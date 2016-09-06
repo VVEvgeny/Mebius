@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorkCopy;
 
 namespace ExtensionMethods.Tests
 {
@@ -14,13 +15,10 @@ namespace ExtensionMethods.Tests
         [Test()]
         public void ToUnixPathTest()
         {
-            Assert.Fail();
-        }
+            var str = @"s:\np\2016.04\homec\vve\";
+            var result = @"./2016.04/homec/vve/";
 
-        [Test()]
-        public void FromUnixPathTest()
-        {
-            Assert.Fail();
+            Assert.IsTrue(str.ToUnixPath() == result, $"\tstr=|{str}| \n\tresult=|{result}|\n\tstrToUnix=|{str.ToUnixPath()}|");
         }
     }
 }

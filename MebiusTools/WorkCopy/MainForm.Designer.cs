@@ -48,6 +48,7 @@
             this.changeVersionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItemConfiguration = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeHBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripMain.SuspendLayout();
             this.menuStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -111,9 +112,10 @@
             this.toolStripSeparator3,
             this.removeToolStripMenuItem,
             this.toolStripSeparator4,
-            this.changeVersionToolStripMenuItem});
+            this.changeVersionToolStripMenuItem,
+            this.changeHBToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
-            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 160);
+            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 204);
             // 
             // copyToolStripMenuItem
             // 
@@ -172,6 +174,7 @@
             this.changeVersionToolStripMenuItem.Name = "changeVersionToolStripMenuItem";
             this.changeVersionToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.changeVersionToolStripMenuItem.Text = "Change Version (-)";
+            this.changeVersionToolStripMenuItem.Click += new System.EventHandler(this.changeVersionToolStripMenuItem_Click);
             // 
             // menuStripMain
             // 
@@ -189,6 +192,13 @@
             this.toolStripMenuItemConfiguration.Size = new System.Drawing.Size(93, 20);
             this.toolStripMenuItemConfiguration.Text = "Configuration";
             this.toolStripMenuItemConfiguration.Click += new System.EventHandler(this.toolStripMenuItemConfiguration_Click);
+            // 
+            // changeHBToolStripMenuItem
+            // 
+            this.changeHBToolStripMenuItem.Name = "changeHBToolStripMenuItem";
+            this.changeHBToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.changeHBToolStripMenuItem.Text = "Change H/B (*)";
+            this.changeHBToolStripMenuItem.Click += new System.EventHandler(this.changeHBToolStripMenuItem_Click);
             // 
             // MainForm
             // 
@@ -234,6 +244,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem changeVersionToolStripMenuItem;
         private System.Windows.Forms.ColumnHeader columnHeader5;
+        private System.Windows.Forms.ToolStripMenuItem changeHBToolStripMenuItem;
     }
 }
 

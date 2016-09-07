@@ -139,11 +139,6 @@ namespace WorkCopy
             }
         }
 
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void removeToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (listViewFiles.SelectedIndices.Count > 0)
@@ -165,9 +160,42 @@ namespace WorkCopy
 
         private void listViewFiles_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Delete)
+            switch (e.KeyCode)
             {
-                removeToolStripMenuItem_Click(sender, new EventArgs());
+                case Keys.Delete:
+                    removeToolStripMenuItem_Click(sender, new EventArgs());
+                    return;
+                case Keys.Subtract:
+                    changeVersionToolStripMenuItem_Click(sender, new EventArgs());
+                    return;
+                case Keys.Multiply:
+                    changeHBToolStripMenuItem_Click(sender, new EventArgs());
+                    return;
+            }
+            bm_debug._Warn("Unknown key=",e.KeyCode);
+        }
+
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+
+            }
+        }
+
+        private void changeVersionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+
+            }
+        }
+
+        private void changeHBToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+
             }
         }
     }

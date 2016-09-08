@@ -46,9 +46,9 @@
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.changeVersionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.changeHBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItemConfiguration = new System.Windows.Forms.ToolStripMenuItem();
-            this.changeHBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripMain.SuspendLayout();
             this.menuStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -115,7 +115,7 @@
             this.changeVersionToolStripMenuItem,
             this.changeHBToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
-            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 204);
+            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 182);
             // 
             // copyToolStripMenuItem
             // 
@@ -134,12 +134,14 @@
             this.compareToolStripMenuItem.Name = "compareToolStripMenuItem";
             this.compareToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.compareToolStripMenuItem.Text = "Compare";
+            this.compareToolStripMenuItem.Click += new System.EventHandler(this.compareToolStripMenuItem_Click);
             // 
             // compareEtalonToolStripMenuItem
             // 
             this.compareEtalonToolStripMenuItem.Name = "compareEtalonToolStripMenuItem";
             this.compareEtalonToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.compareEtalonToolStripMenuItem.Text = "Compare Etalon";
+            this.compareEtalonToolStripMenuItem.Click += new System.EventHandler(this.compareEtalonToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -151,6 +153,7 @@
             this.listForMasterToolStripMenuItem.Name = "listForMasterToolStripMenuItem";
             this.listForMasterToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.listForMasterToolStripMenuItem.Text = "List For Master";
+            this.listForMasterToolStripMenuItem.Click += new System.EventHandler(this.listForMasterToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 
@@ -176,6 +179,13 @@
             this.changeVersionToolStripMenuItem.Text = "Change Version (-)";
             this.changeVersionToolStripMenuItem.Click += new System.EventHandler(this.changeVersionToolStripMenuItem_Click);
             // 
+            // changeHBToolStripMenuItem
+            // 
+            this.changeHBToolStripMenuItem.Name = "changeHBToolStripMenuItem";
+            this.changeHBToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.changeHBToolStripMenuItem.Text = "Change H/B (*)";
+            this.changeHBToolStripMenuItem.Click += new System.EventHandler(this.changeHBToolStripMenuItem_Click);
+            // 
             // menuStripMain
             // 
             this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -192,13 +202,6 @@
             this.toolStripMenuItemConfiguration.Size = new System.Drawing.Size(93, 20);
             this.toolStripMenuItemConfiguration.Text = "Configuration";
             this.toolStripMenuItemConfiguration.Click += new System.EventHandler(this.toolStripMenuItemConfiguration_Click);
-            // 
-            // changeHBToolStripMenuItem
-            // 
-            this.changeHBToolStripMenuItem.Name = "changeHBToolStripMenuItem";
-            this.changeHBToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.changeHBToolStripMenuItem.Text = "Change H/B (*)";
-            this.changeHBToolStripMenuItem.Click += new System.EventHandler(this.changeHBToolStripMenuItem_Click);
             // 
             // MainForm
             // 

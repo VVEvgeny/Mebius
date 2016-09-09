@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -20,8 +21,8 @@ namespace WorkCopy
             public string VersionName;
             public string PacketNumber;
             public string HomeOrBaseText;
-            //public string FileName => System.IO.Path.GetFileName(Path);
-            public string FileName => Path;
+            public string FileName => System.IO.Path.GetFileName(Path);
+            //public string FileName => Path;
         }
 
         public MainForm()
@@ -269,12 +270,41 @@ namespace WorkCopy
 
         private void compareToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+                foreach (var sel in listViewFiles.SelectedIndices)
+                {
+                    var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
+                    RunCompare(_workFiles[(int) sel].Path,
+                        _workFiles[(int) sel].Path.Replace(set.PathLocal,
+                            _workFiles[(int) sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase));
+                }
+            }
         }
 
+        private const string MergeAppAddr = @"C:\Program Files (x86)\Araxis\compare.exe";
+        private void RunCompare(string leftFile, string rightFile)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
+            var startinfo = new ProcessStartInfo
+            {
+                FileName = MergeAppAddr,
+                Arguments = leftFile + " " + rightFile,
+                UseShellExecute = true,
+                CreateNoWindow = true
+            };
+            Process.Start(startinfo);
+        }
         private void compareEtalonToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+                foreach (var sel in listViewFiles.SelectedIndices)
+                {
+                    var set = GetSettingsPathesByName(_workFiles[(int) sel].VersionName);
+                    RunCompare(_workFiles[(int)sel].Path, _workFiles[(int)sel].Path.Replace(set.PathLocal, set.PathEtalon));
+                }
+            }
         }
 
         private SettingsPathes GetSettingsPathesByName(string versionName)

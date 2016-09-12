@@ -29,6 +29,8 @@ namespace WorkCopy
         {
             LoadList();
             listViewSettings_SelectedIndexChanged(sender, e);
+
+            textBoxMergeAppPath.Text = _settings.MergeAppPath;
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
@@ -135,6 +137,17 @@ namespace WorkCopy
             var selected = listViewSettings.SelectedIndices[0];
             LoadList();
             listViewSettings.SelectedIndices.Add(selected);
+        }
+
+        private void buttonUpdateMergeAppPath_Click(object sender, EventArgs e)
+        {
+            _settings.MergeAppPath = textBoxMergeAppPath.Text;
+            _settings.Save();
+        }
+
+        private void textBoxMergeAppPath_TextChanged(object sender, EventArgs e)
+        {
+            buttonUpdateMergeAppPath.Enabled = _settings.MergeAppPath != textBoxMergeAppPath.Text;
         }
     }
 }

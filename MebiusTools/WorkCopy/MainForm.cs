@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using ExtensionMethods;
+using static WorkCopy.Settings;
 
 namespace WorkCopy
 {
@@ -28,12 +29,6 @@ namespace WorkCopy
         public MainForm()
         {
             InitializeComponent();
-
-            bm_debug.Class_using = "WorkCopy";
-            bm_debug.Debug_Output = bm_debug.Debug_Output_Modes.Log_Window;
-            bm_debug.Enabled = true;
-
-            bm_debug._Info("start");
 
             _settings = new Settings();
             _pathes = _settings.SettingsPathes ?? new List<SettingsPathes>();
@@ -114,7 +109,7 @@ namespace WorkCopy
                         var masterNumber = Path.GetExtension(files[0]);
                         if (!string.IsNullOrEmpty(masterNumber) && masterNumber.Contains("."))
                             masterNumber = masterNumber.Replace(".", "");
-                        bm_debug._Info("master file!!");
+                        //BMTools.BmDebug.Info("master file!!");
 
                         var f = new FileStream(files[0], FileMode.Open);
                         var re = new StreamReader(f);
@@ -139,7 +134,7 @@ namespace WorkCopy
                                             line.Replace(path.PathRemoteHome.ToUnixPath(), path.PathLocal)
                                                 .Replace("/", "\\"),
                                         VersionName = path.Name,
-                                        HomeOrBaseText = "H"
+                                        HomeOrBaseText = HomeSelector
                                     });
                                     break;
                                 }
@@ -152,7 +147,7 @@ namespace WorkCopy
                                             line.Replace(path.PathRemoteBase.ToUnixPath(), path.PathLocal)
                                                 .Replace("/", "\\"),
                                         VersionName = path.Name,
-                                        HomeOrBaseText = "B"
+                                        HomeOrBaseText = BaseSelector
                                     });
                                     break;
                                 }
@@ -173,7 +168,7 @@ namespace WorkCopy
                                 PacketNumber = "",
                                 Path = file,
                                 VersionName = path.Name,
-                                HomeOrBaseText = "H"
+                                HomeOrBaseText = HomeSelector
                             });
                         }
                     }
@@ -215,7 +210,7 @@ namespace WorkCopy
                     changeHBToolStripMenuItem_Click(sender, new EventArgs());
                     return;
             }
-            bm_debug._Warn("Unknown key=", e.KeyCode);
+            //BMTools.BmDebug.Warn("Unknown key=", e.KeyCode);
         }
 
         private void NextEtalon(WorkFile workFile)
@@ -254,17 +249,9 @@ namespace WorkCopy
             {
                 foreach (var sel in listViewFiles.SelectedIndices)
                 {
-                    _workFiles[(int)sel].HomeOrBaseText = _workFiles[(int)sel].HomeOrBaseText == @"H" ? "B" : "H";
+                    _workFiles[(int)sel].HomeOrBaseText = IsHomeSelector(_workFiles[(int)sel].HomeOrBaseText) ? BaseSelector : HomeSelector;
                 }
                 LoadList(true);
-            }
-        }
-
-        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (listViewFiles.SelectedIndices.Count > 0)
-            {
-
             }
         }
 
@@ -282,13 +269,17 @@ namespace WorkCopy
             }
         }
 
-        private const string MergeAppAddr = @"C:\Program Files (x86)\Araxis\compare.exe";
         private void RunCompare(string leftFile, string rightFile)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
+            if (string.IsNullOrEmpty(_settings.MergeAppPath))
+            {
+                MessageBox.Show(@"No have configured Merge Application");
+                return;
+            }
             var startinfo = new ProcessStartInfo
             {
-                FileName = MergeAppAddr,
+                FileName = _settings.MergeAppPath,
                 Arguments = leftFile + " " + rightFile,
                 UseShellExecute = true,
                 CreateNoWindow = true
@@ -317,7 +308,7 @@ namespace WorkCopy
             var pathes = GetSettingsPathesByName(versionName);
             return
                 path.Replace(pathes.PathLocal,
-                    homeOrBaseText == "H" ? pathes.PathRemoteHome.ToUnixPath() : pathes.PathRemoteBase.ToUnixPath()
+                    IsHomeSelector(homeOrBaseText) ? pathes.PathRemoteHome.ToUnixPath() : pathes.PathRemoteBase.ToUnixPath()
                     ).Replace("\\", "/") + Environment.NewLine;
         }
         private void listForMasterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -330,6 +321,36 @@ namespace WorkCopy
                             current +
                             GetUnixPath(_workFiles[(int) sel].Path, _workFiles[(int) sel].VersionName, _workFiles[(int) sel].HomeOrBaseText))
                             );
+            }
+        }
+
+        private void takeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (var sel in listViewFiles.SelectedIndices)
+            {
+                CopyFile(GetRemotePath(_workFiles[(int)sel]), _workFiles[(int)sel].Path);
+            }
+        }
+
+        private void CopyFile(string from, string to)
+        {
+            new FileInfo(from).CopyTo(to, true);
+        }
+
+        private string GetRemotePath(WorkFile workFile)
+        {
+            return GetRemotePath(workFile.Path, workFile.VersionName, workFile.HomeOrBaseText);
+        }
+        private string GetRemotePath(string localPath, string versionName, string homeOrBaseText)
+        {
+            var set = GetSettingsPathesByName(versionName);
+            return localPath.Replace(set.PathLocal, IsHomeSelector(homeOrBaseText) ? set.PathRemoteHome : set.PathRemoteBase);
+        }
+        private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (var sel in listViewFiles.SelectedIndices)
+            {
+                CopyFile(_workFiles[(int)sel].Path, GetRemotePath(_workFiles[(int)sel]));
             }
         }
     }

@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkCopy", "WorkCopy\WorkCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkCopyTests", "WorkCopyTests\WorkCopyTests.csproj", "{693F260C-6B77-4FCB-A859-D73B2E06C972}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BmDebug", "BmDebug\BmDebug.csproj", "{EB08BCCD-E3EB-4CF2-AA79-766E95075724}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{693F260C-6B77-4FCB-A859-D73B2E06C972}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{693F260C-6B77-4FCB-A859-D73B2E06C972}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{693F260C-6B77-4FCB-A859-D73B2E06C972}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB08BCCD-E3EB-4CF2-AA79-766E95075724}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB08BCCD-E3EB-4CF2-AA79-766E95075724}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB08BCCD-E3EB-4CF2-AA79-766E95075724}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB08BCCD-E3EB-4CF2-AA79-766E95075724}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

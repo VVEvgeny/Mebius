@@ -15,5 +15,21 @@ namespace WorkCopy
             get { return (List<SettingsPathes>)this["SettingsPathes"]; }
             set { this["SettingsPathes"] = value; }
         }
+
+        [UserScopedSetting]
+        [SettingsSerializeAs(SettingsSerializeAs.String)]
+        [DefaultSettingValue("")]
+        public string MergeAppPath
+        {
+            get { return (string)this["MergeAppPath"]; }
+            set { this["MergeAppPath"] = value; }
+        }
+
+        public const string HomeSelector = "H";
+        public const string BaseSelector = "B";
+        public static bool IsHomeSelector(string homeOrBaseText)
+        {
+            return homeOrBaseText == HomeSelector;
+        }
     }
 }

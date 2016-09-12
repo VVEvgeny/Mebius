@@ -45,6 +45,13 @@
             this.buttonAdd = new System.Windows.Forms.Button();
             this.buttonUpdate = new System.Windows.Forms.Button();
             this.buttonRemove = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBoxMergeAppPath = new System.Windows.Forms.TextBox();
+            this.buttonUpdateMergeAppPath = new System.Windows.Forms.Button();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // listViewSettings
@@ -53,7 +60,7 @@
             this.columnHeader1});
             this.listViewSettings.FullRowSelect = true;
             this.listViewSettings.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this.listViewSettings.Location = new System.Drawing.Point(0, 0);
+            this.listViewSettings.Location = new System.Drawing.Point(6, 19);
             this.listViewSettings.MultiSelect = false;
             this.listViewSettings.Name = "listViewSettings";
             this.listViewSettings.Size = new System.Drawing.Size(146, 187);
@@ -70,7 +77,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(152, 13);
+            this.label1.Location = new System.Drawing.Point(158, 32);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(107, 13);
             this.label1.TabIndex = 2;
@@ -78,7 +85,7 @@
             // 
             // textBoxName
             // 
-            this.textBoxName.Location = new System.Drawing.Point(260, 10);
+            this.textBoxName.Location = new System.Drawing.Point(266, 29);
             this.textBoxName.Name = "textBoxName";
             this.textBoxName.Size = new System.Drawing.Size(223, 20);
             this.textBoxName.TabIndex = 3;
@@ -86,7 +93,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(152, 38);
+            this.label2.Location = new System.Drawing.Point(158, 57);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(107, 13);
             this.label2.TabIndex = 4;
@@ -94,7 +101,7 @@
             // 
             // textBoxNumber
             // 
-            this.textBoxNumber.Location = new System.Drawing.Point(260, 35);
+            this.textBoxNumber.Location = new System.Drawing.Point(266, 54);
             this.textBoxNumber.Name = "textBoxNumber";
             this.textBoxNumber.Size = new System.Drawing.Size(223, 20);
             this.textBoxNumber.TabIndex = 5;
@@ -102,7 +109,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(152, 63);
+            this.label3.Location = new System.Drawing.Point(158, 82);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(106, 13);
             this.label3.TabIndex = 6;
@@ -110,21 +117,21 @@
             // 
             // textBoxPathLocal
             // 
-            this.textBoxPathLocal.Location = new System.Drawing.Point(260, 60);
+            this.textBoxPathLocal.Location = new System.Drawing.Point(266, 79);
             this.textBoxPathLocal.Name = "textBoxPathLocal";
             this.textBoxPathLocal.Size = new System.Drawing.Size(223, 20);
             this.textBoxPathLocal.TabIndex = 7;
             // 
             // textBoxPathRemoteHome
             // 
-            this.textBoxPathRemoteHome.Location = new System.Drawing.Point(260, 85);
+            this.textBoxPathRemoteHome.Location = new System.Drawing.Point(266, 104);
             this.textBoxPathRemoteHome.Name = "textBoxPathRemoteHome";
             this.textBoxPathRemoteHome.Size = new System.Drawing.Size(223, 20);
             this.textBoxPathRemoteHome.TabIndex = 8;
             // 
             // textBoxPathRemoteBase
             // 
-            this.textBoxPathRemoteBase.Location = new System.Drawing.Point(260, 110);
+            this.textBoxPathRemoteBase.Location = new System.Drawing.Point(266, 129);
             this.textBoxPathRemoteBase.Name = "textBoxPathRemoteBase";
             this.textBoxPathRemoteBase.Size = new System.Drawing.Size(223, 20);
             this.textBoxPathRemoteBase.TabIndex = 9;
@@ -132,7 +139,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(152, 88);
+            this.label4.Location = new System.Drawing.Point(158, 107);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(106, 13);
             this.label4.TabIndex = 10;
@@ -141,7 +148,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(152, 113);
+            this.label5.Location = new System.Drawing.Point(158, 132);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(108, 13);
             this.label5.TabIndex = 11;
@@ -150,7 +157,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(152, 138);
+            this.label6.Location = new System.Drawing.Point(158, 157);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(107, 13);
             this.label6.TabIndex = 12;
@@ -158,14 +165,14 @@
             // 
             // textBoxPathEtalon
             // 
-            this.textBoxPathEtalon.Location = new System.Drawing.Point(260, 135);
+            this.textBoxPathEtalon.Location = new System.Drawing.Point(266, 154);
             this.textBoxPathEtalon.Name = "textBoxPathEtalon";
             this.textBoxPathEtalon.Size = new System.Drawing.Size(223, 20);
             this.textBoxPathEtalon.TabIndex = 13;
             // 
             // buttonAdd
             // 
-            this.buttonAdd.Location = new System.Drawing.Point(155, 164);
+            this.buttonAdd.Location = new System.Drawing.Point(161, 183);
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(99, 23);
             this.buttonAdd.TabIndex = 14;
@@ -175,7 +182,7 @@
             // 
             // buttonUpdate
             // 
-            this.buttonUpdate.Location = new System.Drawing.Point(290, 164);
+            this.buttonUpdate.Location = new System.Drawing.Point(296, 183);
             this.buttonUpdate.Name = "buttonUpdate";
             this.buttonUpdate.Size = new System.Drawing.Size(75, 23);
             this.buttonUpdate.TabIndex = 15;
@@ -185,7 +192,7 @@
             // 
             // buttonRemove
             // 
-            this.buttonRemove.Location = new System.Drawing.Point(408, 164);
+            this.buttonRemove.Location = new System.Drawing.Point(414, 183);
             this.buttonRemove.Name = "buttonRemove";
             this.buttonRemove.Size = new System.Drawing.Size(75, 23);
             this.buttonRemove.TabIndex = 16;
@@ -193,35 +200,88 @@
             this.buttonRemove.UseVisualStyleBackColor = true;
             this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
             // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.listViewSettings);
+            this.groupBox1.Controls.Add(this.buttonRemove);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.buttonUpdate);
+            this.groupBox1.Controls.Add(this.textBoxName);
+            this.groupBox1.Controls.Add(this.buttonAdd);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.textBoxPathEtalon);
+            this.groupBox1.Controls.Add(this.textBoxNumber);
+            this.groupBox1.Controls.Add(this.label6);
+            this.groupBox1.Controls.Add(this.label3);
+            this.groupBox1.Controls.Add(this.label5);
+            this.groupBox1.Controls.Add(this.textBoxPathLocal);
+            this.groupBox1.Controls.Add(this.label4);
+            this.groupBox1.Controls.Add(this.textBoxPathRemoteHome);
+            this.groupBox1.Controls.Add(this.textBoxPathRemoteBase);
+            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(499, 214);
+            this.groupBox1.TabIndex = 17;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Etalons";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label7);
+            this.groupBox2.Controls.Add(this.textBoxMergeAppPath);
+            this.groupBox2.Controls.Add(this.buttonUpdateMergeAppPath);
+            this.groupBox2.Location = new System.Drawing.Point(0, 216);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(499, 48);
+            this.groupBox2.TabIndex = 18;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Others";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(12, 19);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(171, 13);
+            this.label7.TabIndex = 17;
+            this.label7.Text = "Merge App Path.............................";
+            // 
+            // textBoxMergeAppPath
+            // 
+            this.textBoxMergeAppPath.Location = new System.Drawing.Point(185, 16);
+            this.textBoxMergeAppPath.Name = "textBoxMergeAppPath";
+            this.textBoxMergeAppPath.Size = new System.Drawing.Size(223, 20);
+            this.textBoxMergeAppPath.TabIndex = 17;
+            this.textBoxMergeAppPath.TextChanged += new System.EventHandler(this.textBoxMergeAppPath_TextChanged);
+            // 
+            // buttonUpdateMergeAppPath
+            // 
+            this.buttonUpdateMergeAppPath.Location = new System.Drawing.Point(414, 14);
+            this.buttonUpdateMergeAppPath.Name = "buttonUpdateMergeAppPath";
+            this.buttonUpdateMergeAppPath.Size = new System.Drawing.Size(75, 23);
+            this.buttonUpdateMergeAppPath.TabIndex = 17;
+            this.buttonUpdateMergeAppPath.Text = "Update";
+            this.buttonUpdateMergeAppPath.UseVisualStyleBackColor = true;
+            this.buttonUpdateMergeAppPath.Click += new System.EventHandler(this.buttonUpdateMergeAppPath_Click);
+            // 
             // Setting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(489, 197);
-            this.Controls.Add(this.buttonRemove);
-            this.Controls.Add(this.buttonUpdate);
-            this.Controls.Add(this.buttonAdd);
-            this.Controls.Add(this.textBoxPathEtalon);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBoxPathRemoteBase);
-            this.Controls.Add(this.textBoxPathRemoteHome);
-            this.Controls.Add(this.textBoxPathLocal);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.textBoxNumber);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBoxName);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.listViewSettings);
+            this.ClientSize = new System.Drawing.Size(498, 266);
+            this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.groupBox1);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Setting";
             this.ShowIcon = false;
             this.Text = "Setting";
             this.Load += new System.EventHandler(this.Setting_Load);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -244,5 +304,10 @@
         private System.Windows.Forms.Button buttonAdd;
         private System.Windows.Forms.Button buttonUpdate;
         private System.Windows.Forms.Button buttonRemove;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBoxMergeAppPath;
+        private System.Windows.Forms.Button buttonUpdateMergeAppPath;
     }
 }

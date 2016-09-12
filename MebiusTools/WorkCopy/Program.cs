@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace WorkCopy
@@ -14,9 +11,24 @@ namespace WorkCopy
         [STAThread]
         static void Main()
         {
+            BMTools.BmDebug.ClassUsing = "WorkCopy";
+            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.File;
+            BMTools.BmDebug.Enabled = true;
+            BMTools.BmDebug.Info("start");
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+
+            try
+            {
+                Application.Run(new MainForm());
+            }
+            catch (Exception e)
+            {
+                BMTools.BmDebug.Crit("Exception=", e.Message);
+                throw;
+            }
+            
         }
     }
 }

@@ -11,7 +11,7 @@ namespace BmDebug
         {
             InitializeComponent();
         }
-        public void Write_Line(string text)
+        public void WriteLine(string text)
         {
             if (!Visible) Visible = true;
             richTextBoxText.Text += text + Environment.NewLine;

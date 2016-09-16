@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BmDebug", "BmDebug\BmDebug.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DmsTrfTree", "DmsTrfTree\DmsTrfTree.csproj", "{30CC1434-2794-40DE-8A9C-B16BB5744EFB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{8E52B6A2-F82F-415D-8E54-59ED866D4810}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{30CC1434-2794-40DE-8A9C-B16BB5744EFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30CC1434-2794-40DE-8A9C-B16BB5744EFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30CC1434-2794-40DE-8A9C-B16BB5744EFB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E52B6A2-F82F-415D-8E54-59ED866D4810}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E52B6A2-F82F-415D-8E54-59ED866D4810}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E52B6A2-F82F-415D-8E54-59ED866D4810}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E52B6A2-F82F-415D-8E54-59ED866D4810}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

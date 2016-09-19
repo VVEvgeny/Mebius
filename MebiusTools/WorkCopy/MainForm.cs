@@ -256,6 +256,94 @@ namespace WorkCopy
             }
         }
 
+        private readonly List<Keys> _ignoreKeyses = new List<Keys>
+        {
+            Keys.Down,
+            Keys.Up,
+            Keys.Shift,
+            Keys.ShiftKey,
+            Keys.LShiftKey,
+            Keys.RShiftKey,
+            Keys.Control,
+            Keys.ControlKey,
+            Keys.LControlKey,
+            Keys.RControlKey,
+            Keys.Left,
+            Keys.Right
+        };
+        private void ProcessFiltr(KeyEventArgs e)
+        {
+            if (_ignoreKeyses.Contains(e.KeyCode)) return;
+            if (e.KeyCode == Keys.Back)
+            {
+                filtrToolStripTextBox.Text = string.Empty;
+                return;
+            }
+            if (e.KeyCode == Keys.D0 || e.KeyCode == Keys.D1 || e.KeyCode == Keys.D2 || e.KeyCode == Keys.D3 || e.KeyCode == Keys.D4 || e.KeyCode == Keys.D5
+                 || e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D9
+                || e.KeyCode == Keys.NumPad0 || e.KeyCode == Keys.NumPad1 || e.KeyCode == Keys.NumPad2 || e.KeyCode == Keys.NumPad3 || e.KeyCode == Keys.NumPad4
+                 || e.KeyCode == Keys.NumPad5 || e.KeyCode == Keys.NumPad6 || e.KeyCode == Keys.NumPad7 || e.KeyCode == Keys.NumPad8 || e.KeyCode == Keys.NumPad9
+                 || e.KeyCode == Keys.OemPeriod
+                 )
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.OemPeriod:
+                        filtrToolStripTextBox.Text += @".";
+                        break;
+                    case Keys.D0:
+                    case Keys.NumPad0:
+                        filtrToolStripTextBox.Text += @"0";
+                        break;
+                    case Keys.D1:
+                    case Keys.NumPad1:
+                        filtrToolStripTextBox.Text += @"1";
+                        break;
+                    case Keys.D2:
+                    case Keys.NumPad2:
+                        filtrToolStripTextBox.Text += @"2";
+                        break;
+                    case Keys.D3:
+                    case Keys.NumPad3:
+                        filtrToolStripTextBox.Text += @"3";
+                        break;
+                    case Keys.D4:
+                    case Keys.NumPad4:
+                        filtrToolStripTextBox.Text += @"4";
+                        break;
+                    case Keys.D5:
+                    case Keys.NumPad5:
+                        filtrToolStripTextBox.Text += @"5";
+                        break;
+                    case Keys.D6:
+                    case Keys.NumPad6:
+                        filtrToolStripTextBox.Text += @"6";
+                        break;
+                    case Keys.D7:
+                    case Keys.NumPad7:
+                        filtrToolStripTextBox.Text += @"7";
+                        break;
+                    case Keys.D8:
+                    case Keys.NumPad8:
+                        filtrToolStripTextBox.Text += @"8";
+                        break;
+                    case Keys.D9:
+                    case Keys.NumPad9:
+                        filtrToolStripTextBox.Text += @"9";
+                        break;
+                }
+            }
+            else
+            {
+                filtrToolStripTextBox.Text += e.KeyData.ToString().ToLower();
+            }
+            
+            for (var i = 0; i < _workFiles.Count; i++)
+            {
+                listViewFiles.Items[i].Selected = _workFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
+                listViewFiles.Items[i].Focused = _workFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
+            }
+        }
         private void listViewFiles_KeyUp(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -270,7 +358,7 @@ namespace WorkCopy
                     changeHBToolStripMenuItem_Click(sender, new EventArgs());
                     return;
             }
-            //BMTools.BmDebug.Warn("Unknown key=", e.KeyCode);
+            ProcessFiltr(e);
         }
 
         private void NextEtalon(WorkFile workFile)
@@ -496,6 +584,11 @@ namespace WorkCopy
                             _workFiles[(int) sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase), true);
                 }
             }
+        }
+
+        private void filtrToolStripTextBox_Click(object sender, EventArgs e)
+        {
+            filtrToolStripTextBox.Text = string.Empty;
         }
     }
 }

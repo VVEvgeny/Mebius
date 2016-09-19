@@ -34,6 +34,8 @@ namespace WorkCopy
             _pathes = _settings.SettingsPathes ?? new List<SettingsPathes>();
             _workFiles = new List<WorkFile>();
             _selectedList = new List<int>();
+
+            LocalsToolStripItems();
         }
 
         private void toolStripMenuItemConfiguration_Click(object sender, EventArgs e)
@@ -41,6 +43,64 @@ namespace WorkCopy
             new Setting().ShowDialog();
             _settings = new Settings();
             _pathes = _settings.SettingsPathes ?? new List<SettingsPathes>();
+            LocalsToolStripItems();
+        }
+
+        private void LocalsToolStripItems()
+        {
+            compareLocalToolStripMenuItem.DropDownItems.Clear();
+            compareEtalonToolStripMenuItem.DropDownItems.Clear();
+
+            for (var i = 0; i < _pathes.Count - 1; i++)
+            {
+                if (_pathes[i].Name == @"0") continue;
+                for (var j = i + 1; j < _pathes.Count; j++)
+                {
+                    if (_pathes[j].Name == @"0") continue;
+
+                    var toolStripMenuItem = new ToolStripMenuItem
+                    {
+                        Name = "local" + "_" + _pathes[i].Name + "_" + _pathes[j].Name,
+                        Size = new System.Drawing.Size(152, 22),
+                        Text = _pathes[i].Name + @" -> " + _pathes[j].Name
+                    };
+                    toolStripMenuItem.Click += compareLocalToolStripMenuItem_Click;
+                    compareLocalToolStripMenuItem.DropDownItems.Add(toolStripMenuItem);
+
+                    var toolStripMenuItemEt = new ToolStripMenuItem
+                    {
+                        Name = "etalon" + "_" + _pathes[i].Name + "_" + _pathes[j].Name,
+                        Size = new System.Drawing.Size(152, 22),
+                        Text = _pathes[i].Name + @" -> " + _pathes[j].Name
+                    };
+                    toolStripMenuItemEt.Click += compareLocalToolStripMenuItem_Click;
+                    compareEtalonToolStripMenuItem.DropDownItems.Add(toolStripMenuItemEt);
+                }
+            }
+        }
+
+        private void compareLocalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+                foreach (var sel in listViewFiles.SelectedIndices)
+                {
+                    //BMTools.BmDebug.Info(((ToolStripMenuItem)sender).Name);
+                    //BMTools.BmDebug.Info(_workFiles[(int)sel].Path);
+
+                    var local = ((ToolStripMenuItem) sender).Name.Split('_')[0] == @"local";
+
+                    var set = GetSettingsPathesByName(_workFiles[(int) sel].VersionName);
+                    var setFrom = GetSettingsPathesByName(((ToolStripMenuItem) sender).Name.Split('_')[1]);
+                    var setTo = GetSettingsPathesByName(((ToolStripMenuItem) sender).Name.Split('_')[2]);
+
+                    //BMTools.BmDebug.Info(_workFiles[(int)sel].Path.Replace(set.PathLocal, setFrom.PathLocal));
+                    //BMTools.BmDebug.Info(_workFiles[(int)sel].Path.Replace(set.PathLocal, setTo.PathLocal));
+
+                    RunCompare(_workFiles[(int) sel].Path.Replace(set.PathLocal, local ? setFrom.PathLocal : setFrom.PathEtalon),
+                        _workFiles[(int) sel].Path.Replace(set.PathLocal, local ? setTo.PathLocal : setTo.PathEtalon));
+                }
+            }
         }
 
         private void listViewFiles_DragEnter(object sender, DragEventArgs e)
@@ -269,9 +329,79 @@ namespace WorkCopy
             }
         }
 
-        private void RunCompare(string leftFile, string rightFile)
+        private static uint CalculateFileCrc(string fileName)
+        {
+            var stream = File.OpenRead(fileName);
+            const int bufferSize = 1024;
+            const uint polynomial = 0xEDB88320;
+
+            var result = 0xFFFFFFFF;
+
+            var buffer = new byte[bufferSize];
+            var tableCrc32 = new uint[256];
+
+            unchecked
+            {
+                //
+                // Инициалиазация таблицы
+                //
+                for (var i = 0; i < 256; i++)
+                {
+                    var crc32 = (uint) i;
+
+                    for (var j = 8; j > 0; j--)
+                    {
+                        if ((crc32 & 1) == 1)
+                            crc32 = (crc32 >> 1) ^ polynomial;
+                        else
+                            crc32 >>= 1;
+                    }
+
+                    tableCrc32[i] = crc32;
+                }
+
+                //
+                // Чтение из буфера
+                //
+                var count = stream.Read(buffer, 0, bufferSize);
+
+                //
+                // Вычисление CRC
+                //
+                while (count > 0)
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        result = ((result) >> 8)
+                                 ^ tableCrc32[(buffer[i])
+                                               ^ ((result) & 0x000000FF)];
+                    }
+
+                    count = stream.Read(buffer, 0, bufferSize);
+                }
+            }
+
+            return ~result;
+        }
+
+        private void RunCompare(string leftFile, string rightFile, bool diffOnly=false)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
+            if (diffOnly)
+            {
+                try
+                {
+                    var lf = new FileInfo(leftFile);
+                    var rf = new FileInfo(rightFile);
+                    if (lf.Length == rf.Length) return;
+                    //if (CalculateFileCrc(leftFile) == CalculateFileCrc(rightFile)) return;
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(@"File open error=" + e.Message);
+                    return;
+                }
+            }
             if (string.IsNullOrEmpty(_settings.MergeAppPath))
             {
                 MessageBox.Show(@"No have configured Merge Application");
@@ -351,6 +481,20 @@ namespace WorkCopy
             foreach (var sel in listViewFiles.SelectedIndices)
             {
                 CopyFile(_workFiles[(int)sel].Path, GetRemotePath(_workFiles[(int)sel]));
+            }
+        }
+
+        private void diffOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+                foreach (var sel in listViewFiles.SelectedIndices)
+                {
+                    var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
+                    RunCompare(_workFiles[(int) sel].Path,
+                        _workFiles[(int) sel].Path.Replace(set.PathLocal,
+                            _workFiles[(int) sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase), true);
+                }
             }
         }
     }

@@ -11,13 +11,13 @@ namespace WorkCopy
         [STAThread]
         static void Main()
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             BMTools.BmDebug.ClassUsing = "WorkCopy";
             BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.File;
             BMTools.BmDebug.Enabled = true;
             BMTools.BmDebug.Info("start");
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
 
             try
             {

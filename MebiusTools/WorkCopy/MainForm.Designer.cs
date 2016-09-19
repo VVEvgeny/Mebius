@@ -39,8 +39,11 @@
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.compareToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.diffOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compareEtalonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.takeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.listForMasterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -49,8 +52,7 @@
             this.changeHBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItemConfiguration = new System.Windows.Forms.ToolStripMenuItem();
-            this.takeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
+            this.compareLocalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripMain.SuspendLayout();
             this.menuStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -109,6 +111,7 @@
             this.toolStripSeparator1,
             this.compareToolStripMenuItem,
             this.compareEtalonToolStripMenuItem,
+            this.compareLocalToolStripMenuItem,
             this.toolStripSeparator2,
             this.takeToolStripMenuItem,
             this.toolStripSeparator5,
@@ -119,7 +122,7 @@
             this.changeVersionToolStripMenuItem,
             this.changeHBToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
-            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 232);
+            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 254);
             // 
             // copyToolStripMenuItem
             // 
@@ -135,10 +138,19 @@
             // 
             // compareToolStripMenuItem
             // 
+            this.compareToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.diffOnlyToolStripMenuItem});
             this.compareToolStripMenuItem.Name = "compareToolStripMenuItem";
             this.compareToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.compareToolStripMenuItem.Text = "Compare";
             this.compareToolStripMenuItem.Click += new System.EventHandler(this.compareToolStripMenuItem_Click);
+            // 
+            // diffOnlyToolStripMenuItem
+            // 
+            this.diffOnlyToolStripMenuItem.Name = "diffOnlyToolStripMenuItem";
+            this.diffOnlyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.diffOnlyToolStripMenuItem.Text = "Diff only";
+            this.diffOnlyToolStripMenuItem.Click += new System.EventHandler(this.diffOnlyToolStripMenuItem_Click);
             // 
             // compareEtalonToolStripMenuItem
             // 
@@ -151,6 +163,18 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(170, 6);
+            // 
+            // takeToolStripMenuItem
+            // 
+            this.takeToolStripMenuItem.Name = "takeToolStripMenuItem";
+            this.takeToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.takeToolStripMenuItem.Text = "Take";
+            this.takeToolStripMenuItem.Click += new System.EventHandler(this.takeToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(170, 6);
             // 
             // listForMasterToolStripMenuItem
             // 
@@ -207,17 +231,11 @@
             this.toolStripMenuItemConfiguration.Text = "Configuration";
             this.toolStripMenuItemConfiguration.Click += new System.EventHandler(this.toolStripMenuItemConfiguration_Click);
             // 
-            // takeToolStripMenuItem
+            // compareLocalToolStripMenuItem
             // 
-            this.takeToolStripMenuItem.Name = "takeToolStripMenuItem";
-            this.takeToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.takeToolStripMenuItem.Text = "Take";
-            this.takeToolStripMenuItem.Click += new System.EventHandler(this.takeToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator5
-            // 
-            this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(170, 6);
+            this.compareLocalToolStripMenuItem.Name = "compareLocalToolStripMenuItem";
+            this.compareLocalToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.compareLocalToolStripMenuItem.Text = "Compare Local";
             // 
             // MainForm
             // 
@@ -266,6 +284,8 @@
         private System.Windows.Forms.ToolStripMenuItem changeHBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem takeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
+        private System.Windows.Forms.ToolStripMenuItem diffOnlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem compareLocalToolStripMenuItem;
     }
 }
 

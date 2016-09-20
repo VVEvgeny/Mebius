@@ -72,7 +72,7 @@
             this.listViewFiles.FullRowSelect = true;
             this.listViewFiles.Location = new System.Drawing.Point(0, 27);
             this.listViewFiles.Name = "listViewFiles";
-            this.listViewFiles.Size = new System.Drawing.Size(323, 423);
+            this.listViewFiles.Size = new System.Drawing.Size(335, 423);
             this.listViewFiles.TabIndex = 0;
             this.listViewFiles.UseCompatibleStateImageBehavior = false;
             this.listViewFiles.View = System.Windows.Forms.View.Details;
@@ -88,7 +88,7 @@
             // columnHeader2
             // 
             this.columnHeader2.Text = "File";
-            this.columnHeader2.Width = 166;
+            this.columnHeader2.Width = 172;
             // 
             // columnHeader3
             // 
@@ -228,7 +228,7 @@
             this.filtrToolStripTextBox});
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
-            this.menuStripMain.Size = new System.Drawing.Size(323, 27);
+            this.menuStripMain.Size = new System.Drawing.Size(335, 27);
             this.menuStripMain.TabIndex = 1;
             this.menuStripMain.Text = "menuStrip1";
             // 
@@ -252,7 +252,7 @@
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(323, 450);
+            this.ClientSize = new System.Drawing.Size(335, 450);
             this.Controls.Add(this.listViewFiles);
             this.Controls.Add(this.menuStripMain);
             this.MainMenuStrip = this.menuStripMain;

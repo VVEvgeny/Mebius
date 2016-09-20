@@ -53,6 +53,7 @@
             this.changeHBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripMain = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItemConfiguration = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemCountSelected = new System.Windows.Forms.ToolStripMenuItem();
             this.filtrToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
             this.contextMenuStripMain.SuspendLayout();
             this.menuStripMain.SuspendLayout();
@@ -76,6 +77,7 @@
             this.listViewFiles.TabIndex = 0;
             this.listViewFiles.UseCompatibleStateImageBehavior = false;
             this.listViewFiles.View = System.Windows.Forms.View.Details;
+            this.listViewFiles.SelectedIndexChanged += new System.EventHandler(this.listViewFiles_SelectedIndexChanged);
             this.listViewFiles.DragDrop += new System.Windows.Forms.DragEventHandler(this.listViewFiles_DragDrop);
             this.listViewFiles.DragEnter += new System.Windows.Forms.DragEventHandler(this.listViewFiles_DragEnter);
             this.listViewFiles.KeyUp += new System.Windows.Forms.KeyEventHandler(this.listViewFiles_KeyUp);
@@ -225,6 +227,7 @@
             // 
             this.menuStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemConfiguration,
+            this.toolStripMenuItemCountSelected,
             this.filtrToolStripTextBox});
             this.menuStripMain.Location = new System.Drawing.Point(0, 0);
             this.menuStripMain.Name = "menuStripMain";
@@ -238,6 +241,12 @@
             this.toolStripMenuItemConfiguration.Size = new System.Drawing.Size(93, 23);
             this.toolStripMenuItemConfiguration.Text = "Configuration";
             this.toolStripMenuItemConfiguration.Click += new System.EventHandler(this.toolStripMenuItemConfiguration_Click);
+            // 
+            // toolStripMenuItemCountSelected
+            // 
+            this.toolStripMenuItemCountSelected.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripMenuItemCountSelected.Name = "toolStripMenuItemCountSelected";
+            this.toolStripMenuItemCountSelected.Size = new System.Drawing.Size(12, 23);
             // 
             // filtrToolStripTextBox
             // 
@@ -297,6 +306,7 @@
         private System.Windows.Forms.ToolStripMenuItem diffOnlyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem compareLocalToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox filtrToolStripTextBox;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCountSelected;
     }
 }
 

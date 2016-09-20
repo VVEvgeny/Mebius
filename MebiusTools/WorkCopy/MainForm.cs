@@ -161,7 +161,8 @@ namespace WorkCopy
             {
                 var files = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (files == null) return;
-                if (files.Length == 1)
+                
+                foreach (var file in files)
                 {
                     var fileName = Path.GetFileName(files[0]);
                     if (fileName != null && fileName.Contains("master"))
@@ -169,7 +170,7 @@ namespace WorkCopy
                         var masterNumber = Path.GetExtension(files[0]);
                         if (!string.IsNullOrEmpty(masterNumber) && masterNumber.Contains("."))
                             masterNumber = masterNumber.Replace(".", "");
-                        //BMTools.BmDebug.Info("master file!!");
+                        BMTools.BmDebug.Info("master file!!");
 
                         var f = new FileStream(files[0], FileMode.Open);
                         var re = new StreamReader(f);
@@ -213,23 +214,23 @@ namespace WorkCopy
                                 }
                             }
                         }
-                        LoadList();
-                        return;
                     }
-                }
-                foreach (var file in files)
-                {
-                    foreach (var path in _pathes)
+                    else
                     {
-                        if (file.ToLower().Contains(path.PathLocal.ToLower()))
+                        //BMTools.BmDebug.Info("NOT master file=",file);
+                        foreach (var path in _pathes)
                         {
-                            AddWorkFile(new WorkFile
+                            //BMTools.BmDebug.Info("path.PathLocal=", path.PathLocal);
+                            if (file.ToLower().Contains(path.PathLocal.ToLower()))
                             {
-                                PacketNumber = "",
-                                Path = file,
-                                VersionName = path.Name,
-                                HomeOrBaseText = HomeSelector
-                            });
+                                AddWorkFile(new WorkFile
+                                {
+                                    PacketNumber = "",
+                                    Path = file,
+                                    VersionName = path.Name,
+                                    HomeOrBaseText = HomeSelector
+                                });
+                            }
                         }
                     }
                 }
@@ -589,6 +590,12 @@ namespace WorkCopy
         private void filtrToolStripTextBox_Click(object sender, EventArgs e)
         {
             filtrToolStripTextBox.Text = string.Empty;
+        }
+
+        private void listViewFiles_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            toolStripMenuItemCountSelected.Text = listViewFiles.SelectedItems.Count.ToString();
+            if (listViewFiles.SelectedItems.Count > 0) listViewFiles.EnsureVisible(listViewFiles.SelectedIndices[0]);
         }
     }
 }

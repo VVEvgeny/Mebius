@@ -275,6 +275,16 @@ namespace WorkCopy
         private void ProcessFiltr(KeyEventArgs e)
         {
             if (_ignoreKeyses.Contains(e.KeyCode)) return;
+            if (e.KeyCode == Keys.Escape)
+            {
+                filtrToolStripTextBox.Text = string.Empty;
+                for (var i = 0; i < _workFiles.Count; i++)
+                {
+                    listViewFiles.Items[i].Selected = false;
+                    listViewFiles.Items[i].Focused = false;
+                }
+                return;
+            }
             if (e.KeyCode == Keys.Back)
             {
                 filtrToolStripTextBox.Text = string.Empty;

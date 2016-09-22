@@ -70,6 +70,7 @@ namespace ExtensionMethods
                 }
             }
 
+            stream.Close();
             return ~result;
         }
     }

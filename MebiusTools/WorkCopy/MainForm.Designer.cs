@@ -39,7 +39,6 @@
             this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.compareToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.diffOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compareEtalonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.compareLocalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -125,7 +124,7 @@
             this.changeVersionToolStripMenuItem,
             this.changeHBToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
-            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 232);
+            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 254);
             // 
             // copyToolStripMenuItem
             // 
@@ -141,19 +140,10 @@
             // 
             // compareToolStripMenuItem
             // 
-            this.compareToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.diffOnlyToolStripMenuItem});
             this.compareToolStripMenuItem.Name = "compareToolStripMenuItem";
             this.compareToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.compareToolStripMenuItem.Text = "Compare";
             this.compareToolStripMenuItem.Click += new System.EventHandler(this.compareToolStripMenuItem_Click);
-            // 
-            // diffOnlyToolStripMenuItem
-            // 
-            this.diffOnlyToolStripMenuItem.Name = "diffOnlyToolStripMenuItem";
-            this.diffOnlyToolStripMenuItem.Size = new System.Drawing.Size(119, 22);
-            this.diffOnlyToolStripMenuItem.Text = "Diff only";
-            this.diffOnlyToolStripMenuItem.Click += new System.EventHandler(this.diffOnlyToolStripMenuItem_Click);
             // 
             // compareEtalonToolStripMenuItem
             // 
@@ -303,7 +293,6 @@
         private System.Windows.Forms.ToolStripMenuItem changeHBToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem takeToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-        private System.Windows.Forms.ToolStripMenuItem diffOnlyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem compareLocalToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox filtrToolStripTextBox;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCountSelected;

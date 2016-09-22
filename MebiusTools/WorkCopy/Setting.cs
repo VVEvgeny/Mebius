@@ -31,6 +31,8 @@ namespace WorkCopy
             listViewSettings_SelectedIndexChanged(sender, e);
 
             textBoxMergeAppPath.Text = _settings.MergeAppPath;
+
+            SetCompareTypeSelected();
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
@@ -139,15 +141,48 @@ namespace WorkCopy
             listViewSettings.SelectedIndices.Add(selected);
         }
 
+        private Settings.CompareTypes GetCompareTypeSelected()
+        {
+            if (radioButtonAlways.Checked) return Settings.CompareTypes.None;
+            if (radioButtonSize.Checked) return Settings.CompareTypes.Size;
+            if (radioButtonDate.Checked) return Settings.CompareTypes.Date;
+            if (radioButtonCrc.Checked) return Settings.CompareTypes.Crc;
+
+            return Settings.CompareTypes.None;
+        }
+
+        private void SetCompareTypeSelected()
+        {
+            switch (_settings.CompareType)
+            {
+                case Settings.CompareTypes.None:
+                    radioButtonAlways.Checked = true;
+                    break;
+                case Settings.CompareTypes.Size:
+                    radioButtonSize.Checked = true;
+                    break;
+                case Settings.CompareTypes.Date:
+                    radioButtonDate.Checked = true;
+                    break;
+                case Settings.CompareTypes.Crc:
+                    radioButtonCrc.Checked = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         private void buttonUpdateMergeAppPath_Click(object sender, EventArgs e)
         {
             _settings.MergeAppPath = textBoxMergeAppPath.Text;
+            _settings.CompareType = GetCompareTypeSelected();
             _settings.Save();
         }
 
-        private void textBoxMergeAppPath_TextChanged(object sender, EventArgs e)
+        private void CompareSettingsChanged(object sender, EventArgs e)
         {
-            buttonUpdateMergeAppPath.Enabled = _settings.MergeAppPath != textBoxMergeAppPath.Text;
+            buttonUpdateMergeAppPath.Enabled = _settings.MergeAppPath != textBoxMergeAppPath.Text 
+                || _settings.CompareType != GetCompareTypeSelected();
         }
     }
 }

@@ -24,6 +24,22 @@ namespace WorkCopy
             get { return (string)this["MergeAppPath"]; }
             set { this["MergeAppPath"] = value; }
         }
+        [UserScopedSetting]
+        [SettingsSerializeAs(SettingsSerializeAs.String)]
+        [DefaultSettingValue("")]
+        public CompareTypes CompareType
+        {
+            get { return (CompareTypes)this["CompareType"]; }
+            set { this["CompareType"] = value; }
+        }
+
+        public enum CompareTypes
+        {
+            None,
+            Size,
+            Date,
+            Crc
+        }
 
         public const string HomeSelector = "H";
         public const string BaseSelector = "B";

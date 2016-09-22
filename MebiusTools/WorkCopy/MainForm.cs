@@ -428,72 +428,47 @@ namespace WorkCopy
             }
         }
 
-        private static uint CalculateFileCrc(string fileName)
-        {
-            var stream = File.OpenRead(fileName);
-            const int bufferSize = 1024;
-            const uint polynomial = 0xEDB88320;
 
-            var result = 0xFFFFFFFF;
 
-            var buffer = new byte[bufferSize];
-            var tableCrc32 = new uint[256];
-
-            unchecked
-            {
-                //
-                // Инициалиазация таблицы
-                //
-                for (var i = 0; i < 256; i++)
-                {
-                    var crc32 = (uint) i;
-
-                    for (var j = 8; j > 0; j--)
-                    {
-                        if ((crc32 & 1) == 1)
-                            crc32 = (crc32 >> 1) ^ polynomial;
-                        else
-                            crc32 >>= 1;
-                    }
-
-                    tableCrc32[i] = crc32;
-                }
-
-                //
-                // Чтение из буфера
-                //
-                var count = stream.Read(buffer, 0, bufferSize);
-
-                //
-                // Вычисление CRC
-                //
-                while (count > 0)
-                {
-                    for (var i = 0; i < count; i++)
-                    {
-                        result = ((result) >> 8)
-                                 ^ tableCrc32[(buffer[i])
-                                               ^ ((result) & 0x000000FF)];
-                    }
-
-                    count = stream.Read(buffer, 0, bufferSize);
-                }
-            }
-
-            return ~result;
-        }
-
-        private void RunCompare(string leftFile, string rightFile, bool diffOnly=false)
+        private void RunCompare(string leftFile, string rightFile)
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
-            if (diffOnly)
+
+            BMTools.BmDebug.Info("compare type=", _settings.CompareType);
+
+            if (_settings.CompareType != CompareTypes.None)
             {
                 try
                 {
+                    BMTools.BmDebug.Info("lf=", leftFile, "rf=", rightFile);
                     var lf = new FileInfo(leftFile);
                     var rf = new FileInfo(rightFile);
-                    if (lf.Length == rf.Length) return;
-                    //if (CalculateFileCrc(leftFile) == CalculateFileCrc(rightFile)) return;
+                    if (_settings.CompareType == CompareTypes.Size)
+                    {
+                        BMTools.BmDebug.Info("lf.Length=", lf.Length, "rf.Length=", rf.Length);
+                        if (lf.Length == rf.Length) return;
+                    }
+                    else if (_settings.CompareType == CompareTypes.Date)
+                    {
+                        BMTools.BmDebug.Info("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
+                        //BMTools.BmDebug.Info("lf=", lf.CreationTime, "rf=", rf.CreationTime);
+                        //BMTools.BmDebug.Info("lf=", lf.LastAccessTime, "rf=", rf.LastAccessTime);
+                        if (lf.LastWriteTime.Date.Year == rf.LastWriteTime.Date.Year &&
+                            lf.LastWriteTime.Date.Day == rf.LastWriteTime.Date.Day &&
+                            lf.LastWriteTime.Date.Hour == rf.LastWriteTime.Date.Hour &&
+                            lf.LastWriteTime.Date.Minute == rf.LastWriteTime.Date.Minute &&
+                            lf.LastWriteTime.Date.Second == rf.LastWriteTime.Date.Second
+                            ) return;
+                    }
+                    else if (_settings.CompareType == CompareTypes.Crc)
+                    {
+                        var crcL = lf.CalculateCrc();
+                        var crcR = rf.CalculateCrc();
+
+                        BMTools.BmDebug.Info("lf.crc=", crcL, "rf.crc=", crcR);
+
+                        if (crcL == crcR) return;    
+                    }
                 }
                 catch (Exception e)
                 {
@@ -580,20 +555,6 @@ namespace WorkCopy
             foreach (var sel in listViewFiles.SelectedIndices)
             {
                 CopyFile(_workFiles[(int)sel].Path, GetRemotePath(_workFiles[(int)sel]));
-            }
-        }
-
-        private void diffOnlyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (listViewFiles.SelectedIndices.Count > 0)
-            {
-                foreach (var sel in listViewFiles.SelectedIndices)
-                {
-                    var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
-                    RunCompare(_workFiles[(int) sel].Path,
-                        _workFiles[(int) sel].Path.Replace(set.PathLocal,
-                            _workFiles[(int) sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase), true);
-                }
             }
         }
 

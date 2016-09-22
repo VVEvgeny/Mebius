@@ -47,11 +47,17 @@
             this.buttonRemove = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioButtonCrc = new System.Windows.Forms.RadioButton();
+            this.radioButtonDate = new System.Windows.Forms.RadioButton();
+            this.radioButtonSize = new System.Windows.Forms.RadioButton();
+            this.radioButtonAlways = new System.Windows.Forms.RadioButton();
             this.label7 = new System.Windows.Forms.Label();
             this.textBoxMergeAppPath = new System.Windows.Forms.TextBox();
             this.buttonUpdateMergeAppPath = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // listViewSettings
@@ -227,15 +233,75 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.groupBox3);
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.textBoxMergeAppPath);
             this.groupBox2.Controls.Add(this.buttonUpdateMergeAppPath);
             this.groupBox2.Location = new System.Drawing.Point(0, 216);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(499, 48);
+            this.groupBox2.Size = new System.Drawing.Size(499, 90);
             this.groupBox2.TabIndex = 18;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Others";
+            this.groupBox2.Text = "Compare";
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.radioButtonCrc);
+            this.groupBox3.Controls.Add(this.radioButtonDate);
+            this.groupBox3.Controls.Add(this.radioButtonSize);
+            this.groupBox3.Controls.Add(this.radioButtonAlways);
+            this.groupBox3.Location = new System.Drawing.Point(15, 42);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(393, 41);
+            this.groupBox3.TabIndex = 18;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Compare By";
+            // 
+            // radioButtonCrc
+            // 
+            this.radioButtonCrc.AutoSize = true;
+            this.radioButtonCrc.Location = new System.Drawing.Point(251, 18);
+            this.radioButtonCrc.Name = "radioButtonCrc";
+            this.radioButtonCrc.Size = new System.Drawing.Size(90, 17);
+            this.radioButtonCrc.TabIndex = 22;
+            this.radioButtonCrc.Text = "Only Diff CRC";
+            this.radioButtonCrc.UseVisualStyleBackColor = true;
+            this.radioButtonCrc.CheckedChanged += new System.EventHandler(this.CompareSettingsChanged);
+            // 
+            // radioButtonDate
+            // 
+            this.radioButtonDate.AutoSize = true;
+            this.radioButtonDate.Location = new System.Drawing.Point(160, 18);
+            this.radioButtonDate.Name = "radioButtonDate";
+            this.radioButtonDate.Size = new System.Drawing.Size(91, 17);
+            this.radioButtonDate.TabIndex = 21;
+            this.radioButtonDate.Text = "Only Diff Date";
+            this.radioButtonDate.UseVisualStyleBackColor = true;
+            this.radioButtonDate.CheckedChanged += new System.EventHandler(this.CompareSettingsChanged);
+            // 
+            // radioButtonSize
+            // 
+            this.radioButtonSize.AutoSize = true;
+            this.radioButtonSize.Location = new System.Drawing.Point(70, 18);
+            this.radioButtonSize.Name = "radioButtonSize";
+            this.radioButtonSize.Size = new System.Drawing.Size(88, 17);
+            this.radioButtonSize.TabIndex = 20;
+            this.radioButtonSize.Text = "Only Diff Size";
+            this.radioButtonSize.UseVisualStyleBackColor = true;
+            this.radioButtonSize.CheckedChanged += new System.EventHandler(this.CompareSettingsChanged);
+            // 
+            // radioButtonAlways
+            // 
+            this.radioButtonAlways.AutoSize = true;
+            this.radioButtonAlways.Checked = true;
+            this.radioButtonAlways.Location = new System.Drawing.Point(6, 18);
+            this.radioButtonAlways.Name = "radioButtonAlways";
+            this.radioButtonAlways.Size = new System.Drawing.Size(58, 17);
+            this.radioButtonAlways.TabIndex = 19;
+            this.radioButtonAlways.TabStop = true;
+            this.radioButtonAlways.Text = "Always";
+            this.radioButtonAlways.UseVisualStyleBackColor = true;
+            this.radioButtonAlways.CheckedChanged += new System.EventHandler(this.CompareSettingsChanged);
             // 
             // label7
             // 
@@ -252,13 +318,13 @@
             this.textBoxMergeAppPath.Name = "textBoxMergeAppPath";
             this.textBoxMergeAppPath.Size = new System.Drawing.Size(223, 20);
             this.textBoxMergeAppPath.TabIndex = 17;
-            this.textBoxMergeAppPath.TextChanged += new System.EventHandler(this.textBoxMergeAppPath_TextChanged);
+            this.textBoxMergeAppPath.TextChanged += new System.EventHandler(this.CompareSettingsChanged);
             // 
             // buttonUpdateMergeAppPath
             // 
             this.buttonUpdateMergeAppPath.Location = new System.Drawing.Point(414, 14);
             this.buttonUpdateMergeAppPath.Name = "buttonUpdateMergeAppPath";
-            this.buttonUpdateMergeAppPath.Size = new System.Drawing.Size(75, 23);
+            this.buttonUpdateMergeAppPath.Size = new System.Drawing.Size(75, 69);
             this.buttonUpdateMergeAppPath.TabIndex = 17;
             this.buttonUpdateMergeAppPath.Text = "Update";
             this.buttonUpdateMergeAppPath.UseVisualStyleBackColor = true;
@@ -268,7 +334,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(498, 266);
+            this.ClientSize = new System.Drawing.Size(498, 314);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.MaximizeBox = false;
@@ -281,6 +347,8 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -309,5 +377,10 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBoxMergeAppPath;
         private System.Windows.Forms.Button buttonUpdateMergeAppPath;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.RadioButton radioButtonCrc;
+        private System.Windows.Forms.RadioButton radioButtonDate;
+        private System.Windows.Forms.RadioButton radioButtonSize;
+        private System.Windows.Forms.RadioButton radioButtonAlways;
     }
 }

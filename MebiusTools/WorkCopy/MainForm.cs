@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using BMTools;
 using ExtensionMethods;
 using static WorkCopy.Settings;
 
@@ -472,6 +473,7 @@ namespace WorkCopy
                 }
                 catch (Exception e)
                 {
+                    BMTools.BmDebug.Crit("RunCompare ", e.Message);
                     MessageBox.Show(@"File open error=" + e.Message);
                     return;
                 }
@@ -536,9 +538,21 @@ namespace WorkCopy
             }
         }
 
-        private void CopyFile(string from, string to)
+        private static void CopyFile(string from, string to)
         {
-            new FileInfo(from).CopyTo(to, true);
+            BMTools.BmDebug.Info("CopyFile from", from, "to", to);
+            try
+            {
+                // ReSharper disable once AssignNullToNotNullAttribute
+                var dir = new DirectoryInfo(Path.GetDirectoryName(to));
+                if (!dir.Exists) dir.Create();
+                new FileInfo(from).CopyTo(to, true);
+            }
+            catch (Exception e)
+            {
+                BMTools.BmDebug.Crit("CopyFile ", e.Message);
+                MessageBox.Show(e.Message);
+            }
         }
 
         private string GetRemotePath(WorkFile workFile)
@@ -567,6 +581,15 @@ namespace WorkCopy
         {
             toolStripMenuItemCountSelected.Text = listViewFiles.SelectedItems.Count.ToString();
             if (listViewFiles.SelectedItems.Count > 0) listViewFiles.EnsureVisible(listViewFiles.SelectedIndices[0]);
+        }
+
+        private void takeEtalonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (var sel in listViewFiles.SelectedIndices)
+            {
+                var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
+                CopyFile(_workFiles[(int)sel].Path.Replace(set.PathLocal, set.PathEtalon), _workFiles[(int)sel].Path);
+            }
         }
     }
 }

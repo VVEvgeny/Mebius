@@ -54,6 +54,7 @@
             this.toolStripMenuItemConfiguration = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemCountSelected = new System.Windows.Forms.ToolStripMenuItem();
             this.filtrToolStripTextBox = new System.Windows.Forms.ToolStripTextBox();
+            this.takeEtalonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripMain.SuspendLayout();
             this.menuStripMain.SuspendLayout();
             this.SuspendLayout();
@@ -116,6 +117,7 @@
             this.compareLocalToolStripMenuItem,
             this.toolStripSeparator2,
             this.takeToolStripMenuItem,
+            this.takeEtalonToolStripMenuItem,
             this.toolStripSeparator5,
             this.listForMasterToolStripMenuItem,
             this.toolStripSeparator3,
@@ -124,7 +126,7 @@
             this.changeVersionToolStripMenuItem,
             this.changeHBToolStripMenuItem});
             this.contextMenuStripMain.Name = "contextMenuStripMain";
-            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 254);
+            this.contextMenuStripMain.Size = new System.Drawing.Size(174, 276);
             // 
             // copyToolStripMenuItem
             // 
@@ -246,6 +248,13 @@
             this.filtrToolStripTextBox.Size = new System.Drawing.Size(100, 23);
             this.filtrToolStripTextBox.Click += new System.EventHandler(this.filtrToolStripTextBox_Click);
             // 
+            // takeEtalonToolStripMenuItem
+            // 
+            this.takeEtalonToolStripMenuItem.Name = "takeEtalonToolStripMenuItem";
+            this.takeEtalonToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
+            this.takeEtalonToolStripMenuItem.Text = "Take Etalon";
+            this.takeEtalonToolStripMenuItem.Click += new System.EventHandler(this.takeEtalonToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -296,6 +305,7 @@
         private System.Windows.Forms.ToolStripMenuItem compareLocalToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox filtrToolStripTextBox;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemCountSelected;
+        private System.Windows.Forms.ToolStripMenuItem takeEtalonToolStripMenuItem;
     }
 }
 

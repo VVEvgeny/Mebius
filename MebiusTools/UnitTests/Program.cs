@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace UnitTests
@@ -16,7 +13,21 @@ namespace UnitTests
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            BMTools.BmDebug.ClassUsing = "UnitTests";
+            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.LogWindow;
+            BMTools.BmDebug.Enabled = true;
+            BMTools.BmDebug.Info("start");
+
+            try
+            {
+                Application.Run(new MainForm());
+            }
+            catch (Exception e)
+            {
+                BMTools.BmDebug.Crit("Exception=", e.Message);
+                throw;
+            }
         }
     }
 }

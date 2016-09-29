@@ -54,14 +54,17 @@
             this.textBoxUser.Name = "textBoxUser";
             this.textBoxUser.Size = new System.Drawing.Size(100, 20);
             this.textBoxUser.TabIndex = 1;
+            this.textBoxUser.Text = "vve";
             // 
             // comboBoxVersion
             // 
+            this.comboBoxVersion.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxVersion.FormattingEnabled = true;
             this.comboBoxVersion.Location = new System.Drawing.Point(60, 9);
             this.comboBoxVersion.Name = "comboBoxVersion";
             this.comboBoxVersion.Size = new System.Drawing.Size(58, 21);
             this.comboBoxVersion.TabIndex = 2;
+            this.comboBoxVersion.SelectedIndexChanged += new System.EventHandler(this.comboBoxVersion_SelectedIndexChanged);
             // 
             // button1
             // 
@@ -77,9 +80,9 @@
             this.labelUserText.AutoSize = true;
             this.labelUserText.Location = new System.Drawing.Point(133, 17);
             this.labelUserText.Name = "labelUserText";
-            this.labelUserText.Size = new System.Drawing.Size(42, 13);
+            this.labelUserText.Size = new System.Drawing.Size(29, 13);
             this.labelUserText.TabIndex = 4;
-            this.labelUserText.Text = "Version";
+            this.labelUserText.Text = "User";
             // 
             // labelPathEtalonText
             // 
@@ -94,11 +97,13 @@
             // 
             this.textBoxPathEtalon.Location = new System.Drawing.Point(80, 47);
             this.textBoxPathEtalon.Name = "textBoxPathEtalon";
-            this.textBoxPathEtalon.Size = new System.Drawing.Size(201, 20);
+            this.textBoxPathEtalon.Size = new System.Drawing.Size(269, 20);
             this.textBoxPathEtalon.TabIndex = 6;
+            this.textBoxPathEtalon.Text = "\\\\linux3.minsk.mebius.net\\exe\\kernel.mt\\data\\";
             // 
             // comboBoxPacket
             // 
+            this.comboBoxPacket.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPacket.FormattingEnabled = true;
             this.comboBoxPacket.Location = new System.Drawing.Point(121, 73);
             this.comboBoxPacket.Name = "comboBoxPacket";
@@ -130,6 +135,7 @@
             this.Controls.Add(this.labelVersionText);
             this.Name = "MainForm";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

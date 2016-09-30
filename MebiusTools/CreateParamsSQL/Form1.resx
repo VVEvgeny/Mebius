@@ -117,4 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="richTextBoxDescribe.Text" xml:space="preserve">
+    <value>При установленном значении YES необходимо включать в         ф.490817 информацию по платежным поручениям, проведенным в корреспонденции с лицевыми счетами на БС 30719/30720 в балансе ДБУиО; при NO - не включать</value>
+  </data>
 </root>

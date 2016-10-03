@@ -62,5 +62,25 @@ namespace UnitTests
                 }
             }
         }
+
+        private void comboBoxPacket_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            textBoxRunTest.Text = @"/exe/kernel.mt/tools/_testpm " + comboBoxPacket.Text;
+        }
+
+        private void buttonCopyRunTest_Click(object sender, EventArgs e)
+        {
+            Clipboard.SetText(textBoxRunTest.Text);
+        }
+
+        private void buttonCompareLocal_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void buttonCompareEtalon_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

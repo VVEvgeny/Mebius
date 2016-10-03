@@ -31,12 +31,17 @@
             this.labelVersionText = new System.Windows.Forms.Label();
             this.textBoxUser = new System.Windows.Forms.TextBox();
             this.comboBoxVersion = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonCopyRunTest = new System.Windows.Forms.Button();
             this.labelUserText = new System.Windows.Forms.Label();
             this.labelPathEtalonText = new System.Windows.Forms.Label();
             this.textBoxPathEtalon = new System.Windows.Forms.TextBox();
             this.comboBoxPacket = new System.Windows.Forms.ComboBox();
             this.labelPacketText = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBoxRunTest = new System.Windows.Forms.TextBox();
+            this.buttonCompareLocal = new System.Windows.Forms.Button();
+            this.buttonCompareEtalon = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelVersionText
@@ -66,14 +71,15 @@
             this.comboBoxVersion.TabIndex = 2;
             this.comboBoxVersion.SelectedIndexChanged += new System.EventHandler(this.comboBoxVersion_SelectedIndexChanged);
             // 
-            // button1
+            // buttonCopyRunTest
             // 
-            this.button1.Location = new System.Drawing.Point(216, 170);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "button1";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonCopyRunTest.Location = new System.Drawing.Point(344, 98);
+            this.buttonCopyRunTest.Name = "buttonCopyRunTest";
+            this.buttonCopyRunTest.Size = new System.Drawing.Size(44, 23);
+            this.buttonCopyRunTest.TabIndex = 3;
+            this.buttonCopyRunTest.Text = "Copy";
+            this.buttonCopyRunTest.UseVisualStyleBackColor = true;
+            this.buttonCopyRunTest.Click += new System.EventHandler(this.buttonCopyRunTest_Click);
             // 
             // labelUserText
             // 
@@ -109,6 +115,7 @@
             this.comboBoxPacket.Name = "comboBoxPacket";
             this.comboBoxPacket.Size = new System.Drawing.Size(153, 21);
             this.comboBoxPacket.TabIndex = 7;
+            this.comboBoxPacket.SelectedIndexChanged += new System.EventHandler(this.comboBoxPacket_SelectedIndexChanged);
             // 
             // labelPacketText
             // 
@@ -119,22 +126,74 @@
             this.labelPacketText.TabIndex = 8;
             this.labelPacketText.Text = "Packet";
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 107);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(51, 13);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "Run Test";
+            // 
+            // textBoxRunTest
+            // 
+            this.textBoxRunTest.Location = new System.Drawing.Point(69, 100);
+            this.textBoxRunTest.Name = "textBoxRunTest";
+            this.textBoxRunTest.Size = new System.Drawing.Size(269, 20);
+            this.textBoxRunTest.TabIndex = 10;
+            // 
+            // buttonCompareLocal
+            // 
+            this.buttonCompareLocal.Location = new System.Drawing.Point(15, 135);
+            this.buttonCompareLocal.Name = "buttonCompareLocal";
+            this.buttonCompareLocal.Size = new System.Drawing.Size(373, 23);
+            this.buttonCompareLocal.TabIndex = 11;
+            this.buttonCompareLocal.Text = "Compare Local";
+            this.buttonCompareLocal.UseVisualStyleBackColor = true;
+            this.buttonCompareLocal.Click += new System.EventHandler(this.buttonCompareLocal_Click);
+            // 
+            // buttonCompareEtalon
+            // 
+            this.buttonCompareEtalon.Location = new System.Drawing.Point(15, 164);
+            this.buttonCompareEtalon.Name = "buttonCompareEtalon";
+            this.buttonCompareEtalon.Size = new System.Drawing.Size(373, 23);
+            this.buttonCompareEtalon.TabIndex = 12;
+            this.buttonCompareEtalon.Text = "Compare Etalon";
+            this.buttonCompareEtalon.UseVisualStyleBackColor = true;
+            this.buttonCompareEtalon.Click += new System.EventHandler(this.buttonCompareEtalon_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(15, 213);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(373, 23);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "Copy Packet data to Local";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(778, 277);
+            this.ClientSize = new System.Drawing.Size(413, 255);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.buttonCompareEtalon);
+            this.Controls.Add(this.buttonCompareLocal);
+            this.Controls.Add(this.textBoxRunTest);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.labelPacketText);
             this.Controls.Add(this.comboBoxPacket);
             this.Controls.Add(this.textBoxPathEtalon);
             this.Controls.Add(this.labelPathEtalonText);
             this.Controls.Add(this.labelUserText);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.buttonCopyRunTest);
             this.Controls.Add(this.comboBoxVersion);
             this.Controls.Add(this.textBoxUser);
             this.Controls.Add(this.labelVersionText);
+            this.MinimizeBox = false;
             this.Name = "MainForm";
-            this.Text = "Form1";
+            this.ShowIcon = false;
+            this.Text = "Unit Tests";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -146,12 +205,17 @@
         private System.Windows.Forms.Label labelVersionText;
         private System.Windows.Forms.TextBox textBoxUser;
         private System.Windows.Forms.ComboBox comboBoxVersion;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonCopyRunTest;
         private System.Windows.Forms.Label labelUserText;
         private System.Windows.Forms.Label labelPathEtalonText;
         private System.Windows.Forms.TextBox textBoxPathEtalon;
         private System.Windows.Forms.ComboBox comboBoxPacket;
         private System.Windows.Forms.Label labelPacketText;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBoxRunTest;
+        private System.Windows.Forms.Button buttonCompareLocal;
+        private System.Windows.Forms.Button buttonCompareEtalon;
+        private System.Windows.Forms.Button button1;
     }
 }
 

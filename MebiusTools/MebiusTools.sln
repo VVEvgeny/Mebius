@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\Unit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateParamsSQL", "CreateParamsSQL\CreateParamsSQL.csproj", "{E4940754-57B0-41CB-9A6D-D3B4192A5C79}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{BA0CE842-43BA-4FF5-A82A-C94666F4859C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{E4940754-57B0-41CB-9A6D-D3B4192A5C79}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4940754-57B0-41CB-9A6D-D3B4192A5C79}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4940754-57B0-41CB-9A6D-D3B4192A5C79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA0CE842-43BA-4FF5-A82A-C94666F4859C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA0CE842-43BA-4FF5-A82A-C94666F4859C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA0CE842-43BA-4FF5-A82A-C94666F4859C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA0CE842-43BA-4FF5-A82A-C94666F4859C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

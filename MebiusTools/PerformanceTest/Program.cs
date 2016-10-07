@@ -7,6 +7,66 @@ namespace PerformanceTest
     {
         static void Main()
         {
+            //string internation
+
+            string s1 = "adsasdasd";
+            string[]
+                ms =
+                {
+                    "adsasdasd",
+                    "aaaa",
+                    "adsasdasd",
+                    "aaaaa",
+                    "adsasdasd",
+                    "aaaaaaaaaaaa",
+                    "adsasdasd",
+                    "aaaaaaaaa"
+                };
+
+            var iterations = 100000000;
+            using (new OperationTimer("compare strings"))
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    foreach (var v in ms)
+                    {
+                        s1.Equals(v);
+                    }
+                }
+            }
+
+
+            using (new OperationTimer("compare strings internation"))
+            {
+                s1 = string.Intern(s1);
+                for (int index = 0; index < ms.Length; index++)
+                {
+                    ms[index] = string.Intern(ms[index]);
+                }
+
+                for (int i = 0; i < iterations; i++)
+                {
+                    foreach (var v in ms)
+                    {
+                        ReferenceEquals(s1, v);
+                    }
+                }
+            }
+
+            using (new OperationTimer("compare strings internation interned"))
+            {
+                for (int i = 0; i < iterations; i++)
+                {
+                    foreach (var v in ms)
+                    {
+                        ReferenceEquals(s1, v);
+                    }
+                }
+            }
+
+
+
+            /*
             using (new OperationTimer("generic List value type"))
             {
                 var iterations = 100000;
@@ -46,6 +106,7 @@ namespace PerformanceTest
                     al.Add(i.ToString());
                 }
             }
+            */
 
             /*
             var iterations = 100;

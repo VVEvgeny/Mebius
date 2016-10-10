@@ -169,12 +169,16 @@ namespace BMTools
 
         private static void WriteDebugFile(string text, Mode m)
         {
-            var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate);
-            var wr = new StreamWriter(f, Enc) {AutoFlush = true};
-            f.Position = f.Length;
-            wr.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
-            wr.Close();
-            f.Close();
+            using (var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate))
+            {
+                f.Position = f.Length;
+                using (var wr = new StreamWriter(f, Enc) {AutoFlush = true})
+                {
+                    wr.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
+                    wr.Close();
+                }
+                f.Close();
+            }
         }
 
         private enum Mode

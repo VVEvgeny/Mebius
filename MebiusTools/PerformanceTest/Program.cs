@@ -1,200 +1,62 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using static System.Int32;
 
 namespace PerformanceTest
 {
-    class Program
+    public interface ITest
     {
+        void Test();
+    }
+
+    internal class Program
+    {
+        private enum Modes
+        {
+            Exit,
+            DebugFile,
+            DebugWindow,
+            StringInternation,
+            Generics,
+            Unknown = MaxValue
+        }
         static void Main()
         {
-            //string internation
-
-            string s1 = "adsasdasd";
-            string[]
-                ms =
-                {
-                    "adsasdasd",
-                    "aaaa",
-                    "adsasdasd",
-                    "aaaaa",
-                    "adsasdasd",
-                    "aaaaaaaaaaaa",
-                    "adsasdasd",
-                    "aaaaaaaaa"
-                };
-
-            var iterations = 100000000;
-            using (new OperationTimer("compare strings"))
+            do
             {
-                for (int i = 0; i < iterations; i++)
+                foreach (Modes m in Enum.GetValues(typeof(Modes)))
                 {
-                    foreach (var v in ms)
-                    {
-                        s1.Equals(v);
-                    }
-                }
-            }
-
-
-            using (new OperationTimer("compare strings internation"))
-            {
-                s1 = string.Intern(s1);
-                for (int index = 0; index < ms.Length; index++)
-                {
-                    ms[index] = string.Intern(ms[index]);
+                    if(m == Modes.Unknown)continue;
+                    Console.WriteLine($"{(int)m}-{m}");
                 }
 
-                for (int i = 0; i < iterations; i++)
-                {
-                    foreach (var v in ms)
-                    {
-                        ReferenceEquals(s1, v);
-                    }
-                }
-            }
+                var command = Console.ReadLine();
 
-            using (new OperationTimer("compare strings internation interned"))
-            {
-                for (int i = 0; i < iterations; i++)
+                
+                int i;
+                var mode = TryParse(command, out i) ? (Modes)Convert.ToInt32(command) : Modes.Unknown;
+                ITest iTest = null;
+                switch (mode)
                 {
-                    foreach (var v in ms)
-                    {
-                        ReferenceEquals(s1, v);
-                    }
+                    case Modes.Exit: return;
+                    case Modes.DebugFile:
+                        iTest = new BmDebugFile();
+                        break;
+                    case Modes.DebugWindow:
+                        iTest = new BmDebugLogWindow();
+                        break;
+                    case Modes.StringInternation:
+                        iTest = new OthersStringInternation();
+                        break;
+                    case Modes.Unknown:
+                        break;
+                    case Modes.Generics:
+                        iTest = new OthersGenerics();
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-            }
-
-
-
-            /*
-            using (new OperationTimer("generic List value type"))
-            {
-                var iterations = 100000;
-                List<int> d= new List<int>(iterations);
-                for (int i = 0; i < iterations; i++)
-                {
-                    d.Add(i);
-                }
-            }
-            using (new OperationTimer("generic List ref type"))
-            {
-                var iterations = 100000;
-                List<string> d = new List<string>(iterations);
-                for (int i = 0; i < iterations; i++)
-                {
-                    d.Add(i.ToString());
-                }
-            }
-
-            using (new OperationTimer("not generic List value type"))
-            {
-                var iterations = 100000;
-                ArrayList al =   new ArrayList();
-
-                for (int i = 0; i < iterations; i++)
-                {
-                    al.Add(i);
-                }
-            }
-            using (new OperationTimer("not generic List ref type"))
-            {
-                var iterations = 100000;
-                ArrayList al = new ArrayList();
-
-                for (int i = 0; i < iterations; i++)
-                {
-                    al.Add(i.ToString());
-                }
-            }
-            */
-
-            /*
-            var iterations = 100;
-
-            BMTools.BmDebug.ClassUsing = "test1";
- 
-            BMTools.BmDebug.Enabled = false;
-            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.File;
-            for (var i = 0; i < iterations; i++)//прогрев
-            {
-                BMTools.BmDebug.Info("test");
-            }
-            using (new OperationTimer("debug Disabled call reference file"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info("test");
-                }
-            }
-            using (new OperationTimer("debug Disabled call value file"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info(105);
-                }
-            }
-
-            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.LogWindow;
-            for (var i = 0; i < iterations; i++)//прогрев
-            {
-                BMTools.BmDebug.Info("test");
-            }
-            using (new OperationTimer("debug Disabled call reference log window"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info("test");
-                }
-            }
-            using (new OperationTimer("debug Disabled call value log window"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info(105);
-                }
-            }
-
-            BMTools.BmDebug.Enabled = true;
-            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.File;
-            for (var i = 0; i < iterations; i++)//прогрев
-            {
-                BMTools.BmDebug.Info("test");
-            }
-            using (new OperationTimer("debug Enabled call reference file"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info("test");
-                }
-            }
-            using (new OperationTimer("debug Enabled call value file"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info(105);
-                }
-            }
-
-            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.LogWindow;
-            for (var i = 0; i < iterations; i++)//прогрев
-            {
-                BMTools.BmDebug.Info("test");
-            }
-            using (new OperationTimer("debug Enabled call reference log window"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info("test");
-                }
-            }
-            using (new OperationTimer("debug Enabled call value log window"))
-            {
-                for (var i = 0; i < iterations; i++)
-                {
-                    BMTools.BmDebug.Info(105);
-                }
-            }
-            */
+                iTest?.Test();
+            } while (true);
         }
     }
 }

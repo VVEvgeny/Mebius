@@ -27,24 +27,7 @@ namespace PerformanceTest
                 if (i%5 == 0) ms[i] = s1;
                 else ms[i] = GenerateRandomWord();
             }
-            //var s1 = "adsasdasd";
-
-
-            /*
-            string []
-                ms =
-                {
-                    "adsasdasd",
-                    "aaaa",
-                    "adsasdasd",
-                    "aaaaa",
-                    "adsasdasd",
-                    "aaaaaaaaaaaa",
-                    "adsasdasd",
-                    "aaaaaaaaa"
-                };
-            */
-
+           
             const int iterations = 100000000;
             using (new OperationTimer("compare strings"))
             {

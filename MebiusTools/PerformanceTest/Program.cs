@@ -8,17 +8,27 @@ namespace PerformanceTest
         void Test();
     }
 
+    public enum Modes
+    {
+        Exit,
+        DebugFile,
+        DebugWindow,
+        StringInternation,
+        Generics,
+        Unknown = MaxValue
+    }
+    public static class ModesExtension
+    {
+        public static Modes GetMode(this string value)
+        {
+            Modes i;
+            // ReSharper disable once RedundantTypeArgumentsOfMethod
+            return Enum.TryParse<Modes>(value, out i) ? i : Modes.Unknown;
+        }
+    }
+
     internal class Program
     {
-        private enum Modes
-        {
-            Exit,
-            DebugFile,
-            DebugWindow,
-            StringInternation,
-            Generics,
-            Unknown = MaxValue
-        }
         static void Main()
         {
             do
@@ -28,14 +38,9 @@ namespace PerformanceTest
                     if(m == Modes.Unknown)continue;
                     Console.WriteLine($"{(int)m}-{m}");
                 }
-
-                var command = Console.ReadLine();
-
                 
-                int i;
-                var mode = TryParse(command, out i) ? (Modes)Convert.ToInt32(command) : Modes.Unknown;
                 ITest iTest = null;
-                switch (mode)
+                switch (Console.ReadLine().GetMode())
                 {
                     case Modes.Exit: return;
                     case Modes.DebugFile:
@@ -55,7 +60,9 @@ namespace PerformanceTest
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
+
                 iTest?.Test();
+
             } while (true);
         }
     }

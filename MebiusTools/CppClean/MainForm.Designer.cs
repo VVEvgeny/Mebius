@@ -1,6 +1,6 @@
 ﻿namespace CppClean
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -37,6 +37,8 @@
             this.textBoxDirectory = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.labelLoadedTotalFilesCount = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             this.labelLoadedUnknownFilesCount = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.labelLoadedForFilesCount = new System.Windows.Forms.Label();
@@ -63,8 +65,6 @@
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.labelProgressAction = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.labelLoadedTotalFilesCount = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -168,6 +168,24 @@
             this.groupBox4.TabIndex = 21;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Stats";
+            // 
+            // labelLoadedTotalFilesCount
+            // 
+            this.labelLoadedTotalFilesCount.AutoSize = true;
+            this.labelLoadedTotalFilesCount.Location = new System.Drawing.Point(266, 30);
+            this.labelLoadedTotalFilesCount.Name = "labelLoadedTotalFilesCount";
+            this.labelLoadedTotalFilesCount.Size = new System.Drawing.Size(13, 13);
+            this.labelLoadedTotalFilesCount.TabIndex = 31;
+            this.labelLoadedTotalFilesCount.Text = "0";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(263, 16);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(34, 13);
+            this.label10.TabIndex = 30;
+            this.label10.Text = "Total:";
             // 
             // labelLoadedUnknownFilesCount
             // 
@@ -419,25 +437,7 @@
             this.label2.TabIndex = 19;
             this.label2.Text = "Action:";
             // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(263, 16);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(34, 13);
-            this.label10.TabIndex = 30;
-            this.label10.Text = "Total:";
-            // 
-            // labelLoadedTotalFilesCount
-            // 
-            this.labelLoadedTotalFilesCount.AutoSize = true;
-            this.labelLoadedTotalFilesCount.Location = new System.Drawing.Point(266, 30);
-            this.labelLoadedTotalFilesCount.Name = "labelLoadedTotalFilesCount";
-            this.labelLoadedTotalFilesCount.Size = new System.Drawing.Size(13, 13);
-            this.labelLoadedTotalFilesCount.TabIndex = 31;
-            this.labelLoadedTotalFilesCount.Text = "0";
-            // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -451,7 +451,7 @@
             this.Controls.Add(this.richTextBoxFileNames);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.ShowIcon = false;
             this.Text = "Cpp Cleaner";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);

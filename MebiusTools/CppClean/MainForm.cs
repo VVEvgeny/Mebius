@@ -13,7 +13,7 @@ using Timer = System.Threading.Timer;
 
 namespace CppClean
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         private readonly Encoding _encoding;
         private List<AllFilesClass> _allFiles;
@@ -37,6 +37,7 @@ namespace CppClean
                     {
                         buttonLoadFiles.Enabled = true;
                         LockControlButtons(true);
+                        buttonChangeDirectory.Enabled = true;
                         _allFiles = null;
                         labelLoadedCodeFilesCount.Text = @"0";
                     }
@@ -63,7 +64,7 @@ namespace CppClean
 
         private static Timer _progressTimer;
 
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
 

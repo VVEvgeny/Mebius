@@ -353,8 +353,9 @@ namespace CppClean
             }
         }
 
+        private delegate string ProcessMatch(string str);
         private List<AllFilesClass> GetDelete(int count, int threadsCount, List<AllFilesClass> list, string pattern,
-            ICollection<AllFilesClass.ExtType> typesFind, Func<string, string> processMatch)
+            ICollection<AllFilesClass.ExtType> typesFind, ProcessMatch processMatch)
         {
             var cnt = new IntToRefType {Count = 0};
             _threadsList = new List<Thread>();
@@ -470,7 +471,7 @@ namespace CppClean
             public IntToRefType Counter;
             public List<AllFilesClass> List;
             public string Pattern;
-            public Func<string, string> ProcessMatch;
+            public ProcessMatch ProcessMatch;
             public int Skip;
             public int Take;
             public ICollection<AllFilesClass.ExtType> TypesFind;

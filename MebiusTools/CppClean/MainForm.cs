@@ -138,7 +138,6 @@ namespace CppClean
             buttonFindCppInMak.Enabled = !needLock;
             buttonFindHppInCpp.Enabled = !needLock;
             buttonFindForInAll.Enabled = !needLock;
-            textBoxDirectory.Enabled = !needLock;
             buttonExcludeTypes.Enabled = !needLock;
             textBoxExcludeTypes.Enabled = !needLock;
             buttonExcludeAddr.Enabled = !needLock;

@@ -128,11 +128,12 @@
             // 
             // textBoxDirectory
             // 
+            this.textBoxDirectory.Enabled = false;
             this.textBoxDirectory.Location = new System.Drawing.Point(62, 17);
             this.textBoxDirectory.Name = "textBoxDirectory";
             this.textBoxDirectory.Size = new System.Drawing.Size(266, 20);
             this.textBoxDirectory.TabIndex = 18;
-            this.textBoxDirectory.Text = "d:\\Work_vve\\etalon_CLEAR\\";
+            this.textBoxDirectory.Text = "d:\\Work_vve\\etalon_nix\\";
             // 
             // groupBox1
             // 

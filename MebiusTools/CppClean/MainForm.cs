@@ -166,8 +166,11 @@ namespace CppClean
 
         private void Work(string text, int percent, ProgressEventType eventType)
         {
-            labelProgressAction.Text = text;
-            progressBar1.Value = GetPercent(percent, 100);
+
+            lock (progressBar1)
+            {
+                progressBar1.Value = GetPercent(percent, 100);
+            }
 
             switch (eventType)
             {
@@ -177,6 +180,7 @@ namespace CppClean
                     richTextBoxFileAddresses.Text = string.Empty;
                     labelFilesInList.Text = @"0";
                     labelProgressAction.ForeColor = Color.Red;
+                    labelProgressAction.Text = text;
                     labelProgressTime.Text = @"Time: 0";
 
                     _checkTime = DateTime.Now;
@@ -186,6 +190,10 @@ namespace CppClean
                     break;
                 case ProgressEventType.Update:
                 {
+                    lock (labelProgressAction)
+                    {
+                            labelProgressAction.Text = text;
+                    }
                 }
                     break;
                 case ProgressEventType.End:
@@ -194,6 +202,7 @@ namespace CppClean
 
                     _timerWork = false;
                     _progressTimer.Change(Timeout.Infinite, Timeout.Infinite);
+                    labelProgressAction.Text = text;
                 }
                     break;
             }
@@ -315,7 +324,7 @@ namespace CppClean
         private void GetDelete(object sendToThread)
         {
             var obj = sendToThread as SendToThreadClass;
-            if (obj == null) return;
+            if (obj == null) throw new NullReferenceException("sendToThread can be only SendToThreadClass");
 
             var rgx = new Regex(obj.Pattern, RegexOptions.IgnoreCase);
 
@@ -327,28 +336,45 @@ namespace CppClean
                     current = obj.Counter.Count++;
                 }
 
-                var f = new FileStream(s.Address, FileMode.Open);
-                var r = new StreamReader(f, _encoding);
-                var matches = rgx.Matches(r.ReadToEnd());
-                if (matches.Count > 0)
+                try
                 {
-                    foreach (Match match in matches)
-                    {
-                        if (match.Value.ToLower().Contains(@"//")) continue;
-                        lock (obj.List)
-                        {
-                            obj.List.RemoveAll(
-                                af =>
-                                    string.Equals(af.Name, obj.ProcessMatch(match.Value),
-                                        StringComparison.CurrentCultureIgnoreCase));
-                        }
-                    }
-                }
-                r.Close();
-                f.Close();
 
-                ProgressEvent.Exec($"Process {current}/{obj.Count} ({GetPercent(current, obj.Count)}%)",
-                    GetPercent(current, obj.Count), ProgressEventType.Update);
+                    using (var f = new FileStream(s.Address, FileMode.Open))
+                    {
+                        using (var r = new StreamReader(f, _encoding))
+                        {
+                            var matches = rgx.Matches(r.ReadToEnd());
+                            if (matches.Count > 0)
+                            {
+                                foreach (Match match in matches)
+                                {
+                                    if (match.Value.ToLower().Contains(@"//")) continue;
+                                    lock (obj.List)
+                                    {
+                                        obj.List.RemoveAll(
+                                            af =>
+                                                string.Equals(af.Name, obj.ProcessMatch(match.Value),
+                                                    StringComparison.CurrentCultureIgnoreCase));
+                                    }
+                                }
+                            }
+                            r.Close();
+                        }
+                        f.Close();
+                    }
+                    ProgressEvent.Exec($"Process {current}/{obj.Count} ({GetPercent(current, obj.Count)}%)",
+                        GetPercent(current, obj.Count), ProgressEventType.Update);
+                }
+                catch (UnauthorizedAccessException unauthorizedAccessException)
+                {
+                    BMTools.BmDebug.Crit("UnauthorizedAccessException=", unauthorizedAccessException.Message, unauthorizedAccessException.StackTrace);
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    BMTools.BmDebug.Crit("Unknown Exception=", e.GetType(), e.Message, e.StackTrace);
+                    throw;
+                }
             }
         }
 
@@ -362,6 +388,10 @@ namespace CppClean
             for (var i = 0; i < threadsCount; i++)
             {
                 _threadsList.Add(new Thread(GetDelete));
+
+                BMTools.BmDebug.Info("start thread=", i, "count=", count, "skip=", part*i, "take=",
+                    i != threadsCount - 1 ? part : count - part*i);
+
                 _threadsList[i].Start(new SendToThreadClass
                 {
                     Count = count,

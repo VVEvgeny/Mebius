@@ -339,7 +339,7 @@
             this.textBoxExcludeAddr.Name = "textBoxExcludeAddr";
             this.textBoxExcludeAddr.Size = new System.Drawing.Size(178, 20);
             this.textBoxExcludeAddr.TabIndex = 23;
-            this.textBoxExcludeAddr.Text = "sys00";
+            this.textBoxExcludeAddr.Text = "sys00,sdk";
             // 
             // textBoxExcludeTypes
             // 

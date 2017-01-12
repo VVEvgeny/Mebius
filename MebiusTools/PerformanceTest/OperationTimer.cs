@@ -27,7 +27,7 @@ namespace PerformanceTest
         {
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            GC.Collect();
+            //GC.Collect();
         }
     }
 }

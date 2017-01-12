@@ -14,8 +14,8 @@ namespace CreateParamsSQL
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             BMTools.BmDebug.ClassUsing = "CreateParamsSQL";
-            BMTools.BmDebug.DebugOutput = BMTools.BmDebug.DebugOutputModes.File;
-            BMTools.BmDebug.Enabled = true;
+            BMTools.BmDebug.Output = BMTools.BmDebug.OutputModes.File;
+            BMTools.BmDebug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
             BMTools.BmDebug.Info("start");
 
             try

@@ -6,14 +6,51 @@ using System.Text;
 using System.Threading;
 using BmDebug;
 
+// Performance results
+// file test
+
+//Mutex WaitOne/Release;
+//00:00:00.0000062
+//00:00:00.0000065
+//00:00:00.2482967
+//00:00:00.2454702
+//00:00:00.0075797
+//00:00:00.0000177
+
+//Monitor.lock
+//00:00:00.0000059
+//00:00:00.0000069
+//00:00:00.1734397
+//00:00:00.1267051
+//00:00:00.0018302
+//00:00:00.0000171
+
+
+//Not Async
+//00:00:05.3720133
+//00:00:00.2117382
+
+//Async Task.Factory.StartNew(() => Execute(m, text));
+//00:00:00.0604626
+//00:00:00.0000299
+
+//ThreadPool.QueueUserWorkItem(Execute, new ExecuteState {Mode = m, ParamsText = text});
+//00:00:00.0312737
+//00:00:00.0000171
+
 namespace BMTools
 {
     /// <summary>
-    ///     Enable For use
-    ///     BMDebug.Enabled = true;
+    ///     For Enable set DebugLevel;
     /// </summary>
     public static class BmDebug
     {
+        private enum Mode
+        {
+            Info,
+            Warning,
+            Critical
+        }
         private static string CurrentDateTime => (DateTime.Now.Day < 10 ? "0" : "") + DateTime.Now.Day + "."
                                                  + (DateTime.Now.Month < 10 ? "0" : "") + DateTime.Now.Month + "."
                                                  + DateTime.Now.Year%1000
@@ -25,44 +62,39 @@ namespace BMTools
                                                  + (DateTime.Now.Millisecond < 10 ? "0" : "") + DateTime.Now.Millisecond
             ;
 
-        public static DebugOutputModes DebugOutput
+        public static OutputModes Output { get; set; } = OutputModes.File;
+
+        public enum DebugLevels
         {
-            set
-            {
-                _mUseFile = value == DebugOutputModes.File;
-                _mUseLogWindow = !_mUseFile;
-            }
+            None,
+            All,
+            Info,
+            Warning,
+            Critical
         }
+
+        //Debug disabled for default
+        /// <summary>
+        /// Change for enable
+        /// </summary>
+        public static DebugLevels DebugLevel { get; set; } = DebugLevels.None;
 
         /// <summary>
         ///     Only set
         /// </summary>
-        public static string ClassUsing { private get; set; } = "NOT SET";
-
-        /// <summary>
-        ///     Enable
-        /// </summary>
-        public static bool Enabled { get; set; }
-
-        public enum DebugOutputModes
+        public static string ClassUsing { private get; set; } = "Unknown";
+        
+        public enum OutputModes
         {
             File,
             LogWindow
         }
+        public static Encoding Encoding = Encoding.GetEncoding("cp866");
 
-        private static readonly Encoding Enc = Encoding.GetEncoding("cp866");
 
-        private static bool _mUseFile;
-        private static bool _mUseLogWindow;
-
-        private static bool _inited;
         private static LogWindow _logWind;
-
-        private static Mutex _mutex;
+        private static readonly object Monitor = new object();
         private static readonly string[] ModeTxt = {" (I) ", " (W) ", " (C) "};
-
-        private static readonly string MEnabledModes = ModeTxt[(int) Mode.Info] + " " + ModeTxt[(int) Mode.Warning] +
-                                                       " " + ModeTxt[(int) Mode.Critical];
 
         /// <summary>
         ///     Info
@@ -70,7 +102,11 @@ namespace BMTools
         /// <param name="text">text/object</param>
         public static void Info(params object[] text)
         {
-            Execute(Mode.Info, text);
+            Execute(Mode.Info, false, text);
+        }
+        public static void InfoAsync(params object[] text)
+        {
+            Execute(Mode.Info, true, text);
         }
 
         /// <summary>
@@ -79,7 +115,11 @@ namespace BMTools
         /// <param name="text">text/object</param>
         public static void Warning(params object[] text)
         {
-            Execute(Mode.Warning, text);
+            Execute(Mode.Warning, false, text);
+        }
+        public static void WarningAsync(params object[] text)
+        {
+            Execute(Mode.Warning, true, text);
         }
 
         /// <summary>
@@ -88,12 +128,43 @@ namespace BMTools
         /// <param name="text">text/object</param>
         public static void Crit(params object[] text)
         {
-            Execute(Mode.Critical, text);
+            Execute(Mode.Critical, false, text);
+        }
+        public static void CritAsyc(params object[] text)
+        {
+            Execute(Mode.Critical, true, text);
         }
 
+        private static void Execute(Mode m, bool isAsync, params object[] text)
+        {
+            if (!isAsync)
+                Execute(m, text);
+            else
+                ThreadPool.QueueUserWorkItem(Execute, new ExecuteState {Mode = m, ParamsText = text});
+        }
+
+        private class ExecuteState
+        {
+            public Mode Mode;
+            public object[] ParamsText;
+        }
+        private static void Execute(object state)
+        {
+            var executeState = state as ExecuteState;
+            if (executeState == null) throw new NullReferenceException("Execute(object state) state == null");
+
+            Execute(executeState.Mode, executeState.ParamsText);
+        }
         private static void Execute(Mode m, params object[] text)
         {
-            if (!Enabled) return;
+            if (DebugLevel != DebugLevels.All &&
+                (
+                    DebugLevel == DebugLevels.None ||
+                    DebugLevel == DebugLevels.Info && m != Mode.Info ||
+                    DebugLevel == DebugLevels.Warning && m != Mode.Warning ||
+                    DebugLevel == DebugLevels.Critical && m != Mode.Critical
+                    )
+                ) return;
             if (text == null) return;
             if (text.Length == 0) return;
             var outp = string.Empty;
@@ -146,25 +217,17 @@ namespace BMTools
             WriteDebug(outp, m);
         }
 
-        private static void Init()
-        {
-            _mutex = new Mutex(false, "debug_class" + "_" + ClassUsing);
-            _inited = true;
-        }
-
         private static void WriteDebug(string text, Mode m)
         {
-            if (!_inited) Init();
-            if (!MEnabledModes.Contains(ModeTxt[(int) m])) return;
-
-            _mutex.WaitOne();
-            if (_mUseFile) WriteDebugFile(text, m);
-            else if (_mUseLogWindow)
+            lock (Monitor)
             {
-                if (_logWind == null) _logWind = new LogWindow();
-                _logWind.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
+                if (Output == OutputModes.File) WriteDebugFile(text, m);
+                else
+                {
+                    if (_logWind == null) _logWind = new LogWindow();
+                    _logWind.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
+                }
             }
-            _mutex.ReleaseMutex();
         }
 
         private static void WriteDebugFile(string text, Mode m)
@@ -172,20 +235,13 @@ namespace BMTools
             using (var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate))
             {
                 f.Position = f.Length;
-                using (var wr = new StreamWriter(f, Enc) {AutoFlush = true})
+                using (var wr = new StreamWriter(f, Encoding) {AutoFlush = true})
                 {
                     wr.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
                     wr.Close();
                 }
                 f.Close();
             }
-        }
-
-        private enum Mode
-        {
-            Info,
-            Warning,
-            Critical
         }
     }
 }

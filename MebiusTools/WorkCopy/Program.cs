@@ -15,7 +15,7 @@ namespace WorkCopy
             Application.SetCompatibleTextRenderingDefault(false);
 
             BMTools.BmDebug.Debug.ClassUsing = "WorkCopy";
-            BMTools.BmDebug.Debug.Output = BMTools.BmDebug.OutputModes.LogWindow;
+            BMTools.BmDebug.Debug.Output = BMTools.BmDebug.OutputModes.File;
             BMTools.BmDebug.Debug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
             BMTools.BmDebug.Debug.Info("start");
 

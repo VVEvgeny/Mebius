@@ -155,14 +155,44 @@ namespace WorkCopy
             }
         }
 
+        private void GetFilesFromDirectory(string path, ICollection<string> files)
+        {
+            var rootDir = new DirectoryInfo(path);
+            foreach (var dir in rootDir.GetDirectories())
+            {
+                GetFilesFromDirectory(dir.FullName, files);
+            }
+            foreach (var file in rootDir.GetFiles())
+            {
+                files.Add(file.FullName);
+            }
+        }
+
         private void listViewFiles_DragDrop(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop, true))
             {
                 var files = e.Data.GetData(DataFormats.FileDrop, true) as string[];
                 if (files == null) return;
-                
+
+                //BMTools.BmDebug.Debug.InfoAsync("file=", files);
+
+                var realFiles = new List<string>();
+
                 foreach (var file in files)
+                {
+                    if (File.GetAttributes(file).HasFlag(FileAttributes.Directory))
+                    {
+                        GetFilesFromDirectory(file, realFiles);
+                    }
+                    else
+                    {
+                        realFiles.Add(file);
+                    }
+                }
+                //BMTools.BmDebug.Debug.InfoAsync("realFiles=", realFiles);
+
+                foreach (var file in realFiles)
                 {
                     var fileName = Path.GetFileName(files[0]);
                     if (fileName != null && fileName.Contains("master"))

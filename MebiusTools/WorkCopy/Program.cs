@@ -14,10 +14,10 @@ namespace WorkCopy
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            BMTools.BmDebug.ClassUsing = "WorkCopy";
-            BMTools.BmDebug.Output = BMTools.BmDebug.OutputModes.LogWindow;
-            BMTools.BmDebug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
-            BMTools.BmDebug.Info("start");
+            BMTools.BmDebug.Debug.ClassUsing = "WorkCopy";
+            BMTools.BmDebug.Debug.Output = BMTools.BmDebug.OutputModes.LogWindow;
+            BMTools.BmDebug.Debug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
+            BMTools.BmDebug.Debug.Info("start");
 
             try
             {
@@ -25,7 +25,7 @@ namespace WorkCopy
             }
             catch (Exception e)
             {
-                BMTools.BmDebug.Crit("Exception=", e.Message);
+                BMTools.BmDebug.Debug.Crit("Exception=", e.Message);
                 throw;
             }
             

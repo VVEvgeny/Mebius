@@ -367,12 +367,12 @@ namespace CppClean
                 }
                 catch (UnauthorizedAccessException unauthorizedAccessException)
                 {
-                    BMTools.BmDebug.Crit("UnauthorizedAccessException=", unauthorizedAccessException.Message, unauthorizedAccessException.StackTrace);
+                    BMTools.BmDebug.Debug.Crit("UnauthorizedAccessException=", unauthorizedAccessException.Message, unauthorizedAccessException.StackTrace);
                     throw;
                 }
                 catch (Exception e)
                 {
-                    BMTools.BmDebug.Crit("Unknown Exception=", e.GetType(), e.Message, e.StackTrace);
+                    BMTools.BmDebug.Debug.Crit("Unknown Exception=", e.GetType(), e.Message, e.StackTrace);
                     throw;
                 }
             }
@@ -389,7 +389,7 @@ namespace CppClean
             {
                 _threadsList.Add(new Thread(GetDelete));
 
-                BMTools.BmDebug.Info("start thread=", i, "count=", count, "skip=", part*i, "take=",
+                BMTools.BmDebug.Debug.Info("start thread=", i, "count=", count, "skip=", part*i, "take=",
                     i != threadsCount - 1 ? part : count - part*i);
 
                 _threadsList[i].Start(new SendToThreadClass

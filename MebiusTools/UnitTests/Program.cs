@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using static BMTools.BmDebug;
 
 namespace UnitTests
 {
@@ -14,10 +15,10 @@ namespace UnitTests
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            BMTools.BmDebug.ClassUsing = "UnitTests";
-            BMTools.BmDebug.Output = BMTools.BmDebug.OutputModes.LogWindow;
-            BMTools.BmDebug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
-            BMTools.BmDebug.Info("start");
+            Debug.ClassUsing = "UnitTests";
+            Debug.Output = OutputModes.LogWindow;
+            Debug.DebugLevel = DebugLevels.All;
+            Debug.Info("start");
 
             try
             {
@@ -25,7 +26,7 @@ namespace UnitTests
             }
             catch (Exception e)
             {
-                BMTools.BmDebug.Crit("Exception=", e.Message);
+                Debug.Crit("Exception=", e.Message);
                 throw;
             }
         }

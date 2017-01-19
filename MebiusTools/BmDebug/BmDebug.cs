@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using BmDebug;
 
 // Performance results
@@ -43,26 +46,20 @@ namespace BMTools
     /// <summary>
     ///     For Enable set DebugLevel;
     /// </summary>
-    public static class BmDebug
+    public class BmDebug
     {
+        private static readonly Lazy<BmDebug> Instance = new Lazy<BmDebug>(() => new BmDebug());
+        public static BmDebug Debug => Instance.Value;
+
         private enum Mode
         {
             Info,
             Warning,
             Critical
         }
-        private static string CurrentDateTime => (DateTime.Now.Day < 10 ? "0" : "") + DateTime.Now.Day + "."
-                                                 + (DateTime.Now.Month < 10 ? "0" : "") + DateTime.Now.Month + "."
-                                                 + DateTime.Now.Year%1000
-                                                 + " "
-                                                 + (DateTime.Now.Hour < 10 ? "0" : "") + DateTime.Now.Hour + ":"
-                                                 + (DateTime.Now.Minute < 10 ? "0" : "") + DateTime.Now.Minute + ":"
-                                                 + (DateTime.Now.Second < 10 ? "0" : "") + DateTime.Now.Second + ":"
-                                                 + (DateTime.Now.Millisecond < 100 ? "0" : "")
-                                                 + (DateTime.Now.Millisecond < 10 ? "0" : "") + DateTime.Now.Millisecond
-            ;
 
-        public static OutputModes Output { get; set; } = OutputModes.File;
+        public OutputModes Output { get; set; } = OutputModes.File;
+        public bool DisableTimeStamp = false;
 
         public enum DebugLevels
         {
@@ -77,47 +74,78 @@ namespace BMTools
         /// <summary>
         /// Change for enable
         /// </summary>
-        public static DebugLevels DebugLevel { get; set; } = DebugLevels.None;
+        public DebugLevels DebugLevel { get; set; } = DebugLevels.None;
 
         /// <summary>
         ///     Only set
         /// </summary>
-        public static string ClassUsing { private get; set; } = "Unknown";
+        public string ClassUsing { private get; set; } = "Unknown";
         
         public enum OutputModes
         {
             File,
             LogWindow
         }
-        public static Encoding Encoding = Encoding.GetEncoding("cp866");
+        public Encoding Encoding = Encoding.GetEncoding("cp866");
 
 
-        private static LogWindow _logWind;
-        private static readonly object Monitor = new object();
-        private static readonly string[] ModeTxt = {" (I) ", " (W) ", " (C) "};
+        private LogWindow _logWind;
+        private readonly object _monitor = new object();
+        private readonly string[] _modeTxt = {" (I) ", " (W) ", " (C) "};
+
+
+        public class CallerInfo
+        {
+            public static bool HaveCaller = false;
+
+            public static string MemberName = "";
+            public static string FilePath = "";
+            public static int LineNumber;
+
+        }
+
+        public BmDebug SaveCall(bool fullFilePath = false,[CallerMemberName] string memberName = "", [CallerFilePath] string filePath = "",
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            CallerInfo.HaveCaller = true;
+            CallerInfo.MemberName = memberName;
+            CallerInfo.FilePath = fullFilePath ? filePath : Path.GetFileName(filePath);
+            CallerInfo.LineNumber = lineNumber;
+
+            return Instance.Value;
+        }
 
         /// <summary>
         ///     Info
         /// </summary>
         /// <param name="text">text/object</param>
-        public static void Info(params object[] text)
+        public void Info(params object[] text)
         {
             Execute(Mode.Info, false, text);
         }
-        public static void InfoAsync(params object[] text)
+        public void InfoAsync(params object[] text)
         {
             Execute(Mode.Info, true, text);
+        }
+
+        public void Info(int val)
+        {
+            Execute(Mode.Info, false, val);
+        }
+        public void InfoAsync(int val)
+        {
+            Execute(Mode.Info, true, val);
         }
 
         /// <summary>
         ///     Warning
         /// </summary>
         /// <param name="text">text/object</param>
-        public static void Warning(params object[] text)
+        public void Warning(params object[] text)
         {
             Execute(Mode.Warning, false, text);
         }
-        public static void WarningAsync(params object[] text)
+        public void WarningAsync(params object[] text)
         {
             Execute(Mode.Warning, true, text);
         }
@@ -126,21 +154,28 @@ namespace BMTools
         ///     Critical
         /// </summary>
         /// <param name="text">text/object</param>
-        public static void Crit(params object[] text)
+        public void Crit(params object[] text)
         {
             Execute(Mode.Critical, false, text);
         }
-        public static void CritAsyc(params object[] text)
+        public void CritAsyc(params object[] text)
         {
             Execute(Mode.Critical, true, text);
         }
 
-        private static void Execute(Mode m, bool isAsync, params object[] text)
+        private void Execute(Mode m, bool isAsync, params object[] text)
         {
             if (!isAsync)
                 Execute(m, text);
             else
                 ThreadPool.QueueUserWorkItem(Execute, new ExecuteState {Mode = m, ParamsText = text});
+        }
+        private void Execute(Mode m, bool isAsync, int val)
+        {
+            if (!isAsync)
+                Execute(m, val);
+            else
+                ThreadPool.QueueUserWorkItem(ExecuteVal, new ExecuteStateValue { Mode = m, ParamsText = val });
         }
 
         private class ExecuteState
@@ -148,14 +183,63 @@ namespace BMTools
             public Mode Mode;
             public object[] ParamsText;
         }
-        private static void Execute(object state)
+        private class ExecuteStateValue
+        {
+            public Mode Mode;
+            public int ParamsText;
+        }
+
+        private void Execute(object state)
         {
             var executeState = state as ExecuteState;
             if (executeState == null) throw new NullReferenceException("Execute(object state) state == null");
 
             Execute(executeState.Mode, executeState.ParamsText);
         }
-        private static void Execute(Mode m, params object[] text)
+
+        private void ExecuteVal(object state)
+        {
+            var executeState = state as ExecuteStateValue;
+            if (executeState == null) throw new NullReferenceException("ExecuteVal(object state) state == null");
+
+            Execute(executeState.Mode, executeState.ParamsText);
+        }
+
+        private void Execute(Mode m, int val)
+        {
+            if (DebugLevel != DebugLevels.All &&
+                (
+                    DebugLevel == DebugLevels.None ||
+                    DebugLevel == DebugLevels.Info && m != Mode.Info ||
+                    DebugLevel == DebugLevels.Warning && m != Mode.Warning ||
+                    DebugLevel == DebugLevels.Critical && m != Mode.Critical
+                    )
+                ) return;
+
+            lock (_monitor)
+            {
+                if (Output == OutputModes.File)
+                {
+                    using (var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate))
+                    {
+                        f.Position = f.Length;
+                        using (var wr = new StreamWriter(f, Encoding) { AutoFlush = true })
+                        {
+                            wr.WriteLine(DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff") + _modeTxt[(int)m] + ":" + val);
+                            wr.Close();
+                        }
+                        f.Close();
+                    }
+                }
+                else
+                {
+                    if (_logWind == null) _logWind = new LogWindow();
+                    _logWind.WriteLine(DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff") + _modeTxt[(int)m] + ":" + val);
+                }
+            }
+        }
+
+        private void Execute(Mode m, params object[] text)
         {
             if (DebugLevel != DebugLevels.All &&
                 (
@@ -214,33 +298,38 @@ namespace BMTools
                 }
                 outp += s + " ";
             }
-            WriteDebug(outp, m);
-        }
 
-        private static void WriteDebug(string text, Mode m)
-        {
-            lock (Monitor)
+            lock (_monitor)
             {
-                if (Output == OutputModes.File) WriteDebugFile(text, m);
+                var strAppend = string.Empty;
+                if (CallerInfo.HaveCaller)
+                {
+                    CallerInfo.HaveCaller = false;
+                    strAppend = "(" + CallerInfo.FilePath + "("+CallerInfo.MemberName+")" + ":" + CallerInfo.LineNumber + "):";
+                }
+
+                var str = (DisableTimeStamp ? string.Empty : DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff"))
+                    + _modeTxt[(int)m] + ":"+ strAppend + outp;
+
+                if (Output == OutputModes.File)
+                {
+                    using (var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate))
+                    {
+                        f.Position = f.Length;
+                        using (var wr = new StreamWriter(f, Encoding) {AutoFlush = true})
+                        {
+                            
+                            wr.WriteLine(str);
+                            wr.Close();
+                        }
+                        f.Close();
+                    }
+                }
                 else
                 {
                     if (_logWind == null) _logWind = new LogWindow();
-                    _logWind.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
+                    _logWind.WriteLine(str);
                 }
-            }
-        }
-
-        private static void WriteDebugFile(string text, Mode m)
-        {
-            using (var f = new FileStream(ClassUsing + ".txt", FileMode.OpenOrCreate))
-            {
-                f.Position = f.Length;
-                using (var wr = new StreamWriter(f, Encoding) {AutoFlush = true})
-                {
-                    wr.WriteLine(CurrentDateTime + ModeTxt[(int) m] + ":" + text);
-                    wr.Close();
-                }
-                f.Close();
             }
         }
     }

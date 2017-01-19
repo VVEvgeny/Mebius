@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using BMTools;
 using ExtensionMethods;
 using static WorkCopy.Settings;
 
@@ -171,7 +170,7 @@ namespace WorkCopy
                         var masterNumber = Path.GetExtension(files[0]);
                         if (!string.IsNullOrEmpty(masterNumber) && masterNumber.Contains("."))
                             masterNumber = masterNumber.Replace(".", "");
-                        BMTools.BmDebug.Info("master file!!");
+                        BMTools.BmDebug.Debug.Info("master file!!");
 
                         var f = new FileStream(files[0], FileMode.Open);
                         var re = new StreamReader(f);
@@ -435,23 +434,23 @@ namespace WorkCopy
         {
             if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
 
-            BMTools.BmDebug.Info("compare type=", _settings.CompareType);
+            BMTools.BmDebug.Debug.Info("compare type=", _settings.CompareType);
 
             if (_settings.CompareType != CompareTypes.None)
             {
                 try
                 {
-                    BMTools.BmDebug.Info("lf=", leftFile, "rf=", rightFile);
+                    BMTools.BmDebug.Debug.Info("lf=", leftFile, "rf=", rightFile);
                     var lf = new FileInfo(leftFile);
                     var rf = new FileInfo(rightFile);
                     if (_settings.CompareType == CompareTypes.Size)
                     {
-                        BMTools.BmDebug.Info("lf.Length=", lf.Length, "rf.Length=", rf.Length);
+                        BMTools.BmDebug.Debug.Info("lf.Length=", lf.Length, "rf.Length=", rf.Length);
                         if (lf.Length == rf.Length) return;
                     }
                     else if (_settings.CompareType == CompareTypes.Date)
                     {
-                        BMTools.BmDebug.Info("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
+                        BMTools.BmDebug.Debug.Info("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
                         //BMTools.BmDebug.Info("lf=", lf.CreationTime, "rf=", rf.CreationTime);
                         //BMTools.BmDebug.Info("lf=", lf.LastAccessTime, "rf=", rf.LastAccessTime);
                         if (lf.LastWriteTime.Date.Year == rf.LastWriteTime.Date.Year &&
@@ -466,14 +465,14 @@ namespace WorkCopy
                         var crcL = lf.CalculateCrc();
                         var crcR = rf.CalculateCrc();
 
-                        BMTools.BmDebug.Info("lf.crc=", crcL, "rf.crc=", crcR);
+                        BMTools.BmDebug.Debug.Info("lf.crc=", crcL, "rf.crc=", crcR);
 
                         if (crcL == crcR) return;    
                     }
                 }
                 catch (Exception e)
                 {
-                    BMTools.BmDebug.Crit("RunCompare ", e.Message);
+                    BMTools.BmDebug.Debug.Crit("RunCompare ", e.Message);
                     MessageBox.Show(@"File open error=" + e.Message);
                     return;
                 }
@@ -540,7 +539,7 @@ namespace WorkCopy
 
         private static void CopyFile(string from, string to)
         {
-            BMTools.BmDebug.Info("CopyFile from", from, "to", to);
+            BMTools.BmDebug.Debug.Info("CopyFile from", from, "to", to);
             try
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
@@ -550,7 +549,7 @@ namespace WorkCopy
             }
             catch (Exception e)
             {
-                BMTools.BmDebug.Crit("CopyFile ", e.Message);
+                BMTools.BmDebug.Debug.Crit("CopyFile ", e.Message);
                 MessageBox.Show(e.Message);
             }
         }

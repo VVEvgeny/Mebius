@@ -1,10 +1,12 @@
-﻿namespace BMTools
+﻿using static BMTools.BmDebug;
+
+namespace BMTools
 {
     public static class BmDebugExtension
     {
         public static object ToDebug(this object obj)
         {
-            BmDebug.Info(obj);
+            Debug.InfoAsync(obj);
             return obj;
         }
     }

@@ -43,7 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BmDebug.cs" />
+    <Compile Include="BmDebugFile.cs" />
+    <Compile Include="BmDebugLogWindow.cs" />
     <Compile Include="OperationTimer.cs" />
     <Compile Include="Others.cs" />
     <Compile Include="Program.cs" />

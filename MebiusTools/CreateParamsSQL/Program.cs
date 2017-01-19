@@ -13,10 +13,10 @@ namespace CreateParamsSQL
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            BMTools.BmDebug.ClassUsing = "CreateParamsSQL";
-            BMTools.BmDebug.Output = BMTools.BmDebug.OutputModes.File;
-            BMTools.BmDebug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
-            BMTools.BmDebug.Info("start");
+            BMTools.BmDebug.Debug.ClassUsing = "CreateParamsSQL";
+            BMTools.BmDebug.Debug.Output = BMTools.BmDebug.OutputModes.File;
+            BMTools.BmDebug.Debug.DebugLevel = BMTools.BmDebug.DebugLevels.All;
+            BMTools.BmDebug.Debug.Info("start");
 
             try
             {
@@ -24,7 +24,7 @@ namespace CreateParamsSQL
             }
             catch (Exception e)
             {
-                BMTools.BmDebug.Crit("Exception=", e.Message);
+                BMTools.BmDebug.Debug.Crit("Exception=", e.Message);
                 throw;
             }
         }

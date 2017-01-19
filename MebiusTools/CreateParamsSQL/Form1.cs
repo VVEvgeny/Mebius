@@ -190,7 +190,7 @@ namespace CreateParamsSQL
 
             if (sf.ShowDialog() == DialogResult.OK)
             {
-                BMTools.BmDebug.Info("DialogResult.OK", sf.FileName);
+                BMTools.BmDebug.Debug.Info("DialogResult.OK", sf.FileName);
                 //if (sf.CheckFileExists)
 
 

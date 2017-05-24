@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
 using BmDebug;
 
 // Performance results
@@ -41,6 +40,8 @@ using BmDebug;
 //00:00:00.0312737
 //00:00:00.0000171
 
+
+//First call only Sync!!
 namespace BMTools
 {
     /// <summary>
@@ -58,7 +59,7 @@ namespace BMTools
             Critical
         }
 
-        public OutputModes Output { get; set; } = OutputModes.File;
+        public OutputModes Output { get; set; }
         public bool DisableTimeStamp = false;
 
         public enum DebugLevels
@@ -88,18 +89,17 @@ namespace BMTools
         }
         public Encoding Encoding = Encoding.GetEncoding("cp866");
 
-
-        private LogWindow _logWind;
+        private readonly LogWindow _logWind = new LogWindow();
         private readonly object _monitor = new object();
         private readonly string[] _modeTxt = {" (I) ", " (W) ", " (C) "};
 
 
-        public class CallerInfo
+        private class CallerInfo
         {
             public static bool HaveCaller = false;
 
-            public static string MemberName = "";
-            public static string FilePath = "";
+            public static string MemberName = string.Empty;
+            public static string FilePath = string.Empty;
             public static int LineNumber;
 
         }
@@ -233,7 +233,6 @@ namespace BMTools
                 }
                 else
                 {
-                    if (_logWind == null) _logWind = new LogWindow();
                     _logWind.WriteLine(DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff") + _modeTxt[(int)m] + ":" + val);
                 }
             }
@@ -256,47 +255,47 @@ namespace BMTools
             {
                 if (s == null) continue;
 
-                if (s.GetType() == typeof(List<string>))
+                if (s.GetType() == typeof(MethodBase))
+                {
+                    var mb = (MethodBase)s;
+                    outp += $"Method {mb.Name} (" + mb.GetParameters().Aggregate(outp, (current, param) => current + param.Name + param.ToString()) + ")";
+                }
+                else if (s.GetType() == typeof(List<string>))
                 {
                     outp += ((List<string>) s).Aggregate(outp, (current, oo) => current + oo + " ") + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(List<int>))
+                else if (s.GetType() == typeof(List<int>))
                 {
                     outp += ((List<int>) s).Aggregate(outp, (current, oo) => current + oo + " ") + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(List<double>))
+                else if (s.GetType() == typeof(List<double>))
                 {
                     outp += ((List<double>) s).Aggregate(outp, (current, oo) => current + oo + " ") + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(object[]))
+                else if (s.GetType() == typeof(object[]))
                 {
                     outp += ((object[]) s).Aggregate(outp, (current, oo) => current + (oo + " ")) + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(string[]))
+                else if (s.GetType() == typeof(string[]))
                 {
                     outp += ((string[]) s).Aggregate(outp, (current, oo) => current + oo + " ") + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(int[]))
+                else if (s.GetType() == typeof(int[]))
                 {
                     outp += ((int[]) s).Aggregate(outp, (current, oo) => current + (oo + " ")) + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(double[]))
+                else if (s.GetType() == typeof(double[]))
                 {
                     outp += ((double[]) s).Aggregate(outp, (current, oo) => current + (oo + " ")) + ",";
-                    continue;
                 }
-                if (s.GetType() == typeof(long[]))
+                else if (s.GetType() == typeof(long[]))
                 {
                     outp += ((long[]) s).Aggregate(outp, (current, oo) => current + (oo + " ")) + ",";
-                    continue;
                 }
-                outp += s + " ";
+                else
+                {
+                    outp += s + " ";
+                }
             }
 
             lock (_monitor)
@@ -327,7 +326,6 @@ namespace BMTools
                 }
                 else
                 {
-                    if (_logWind == null) _logWind = new LogWindow();
                     _logWind.WriteLine(str);
                 }
             }

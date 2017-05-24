@@ -1,49 +1,40 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace BmDebug
 {
-    public partial class LogWindow : Form
+    public class LogWindow : Form
     {
-        private RichTextBox richTextBoxText;
-    
+        private readonly RichTextBox _richTextBoxText = new RichTextBox();
+
         public LogWindow()
         {
-            InitializeComponent();
-        }
-        public void WriteLine(string text)
-        {
-            if (!Visible) Visible = true;
-            richTextBoxText.Text += text + Environment.NewLine;
-        }
-
-        private void InitializeComponent()
-        {
-            this.richTextBoxText = new System.Windows.Forms.RichTextBox();
-            this.SuspendLayout();
+            SuspendLayout();
             // 
             // richTextBoxText
             // 
-            this.richTextBoxText.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBoxText.Location = new System.Drawing.Point(0, 0);
-            this.richTextBoxText.Name = "richTextBoxText";
-            this.richTextBoxText.Size = new System.Drawing.Size(808, 210);
-            this.richTextBoxText.TabIndex = 0;
-            this.richTextBoxText.Text = "";
-            this.richTextBoxText.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.richTextBoxText_MouseDoubleClick);
-            // 
-            // LogWindow
-            // 
-            this.ClientSize = new System.Drawing.Size(808, 210);
-            this.Controls.Add(this.richTextBoxText);
-            this.Name = "LogWindow";
-            this.ResumeLayout(false);
+            _richTextBoxText.Dock = DockStyle.Fill;
+            _richTextBoxText.Location = new Point(0, 0);
+            _richTextBoxText.Name = nameof(_richTextBoxText);
+            _richTextBoxText.Size = new Size(808, 210);
+            _richTextBoxText.TabIndex = 0;
+            _richTextBoxText.Text = string.Empty;
+            _richTextBoxText.MouseDoubleClick +=
+                (s, e) => _richTextBoxText.BeginInvoke((MethodInvoker) (() => _richTextBoxText.Text = string.Empty));
+            
 
+            ClientSize = new Size(808, 210);
+            Controls.Add(_richTextBoxText);
+            Name = GetType().Name;
+            ResumeLayout(false);
         }
 
-        private void richTextBoxText_MouseDoubleClick(object sender, MouseEventArgs e)
+        public void WriteLine(string text)
         {
-            richTextBoxText.Text = string.Empty;
+            if (!Visible) Visible = true;
+
+            _richTextBoxText.BeginInvoke((MethodInvoker) (() => _richTextBoxText.Text += text + Environment.NewLine));
         }
     }
 }

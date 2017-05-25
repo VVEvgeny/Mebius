@@ -8,6 +8,7 @@ namespace Tasks
         public string Name { get; set; }
         public DateTime Date { get; set; }
         public int Repeat { get; set; }
+        public string StopResult { get; set; }
 
         public enum RepeatModes
         {
@@ -25,7 +26,7 @@ namespace Tasks
         public override string ToString()
         {
             //return Name + " "+ Date + " " + (RepeatModes) Enum.Parse(typeof(RepeatModes), Repeat.ToString());
-            return Name + " " + Date + " " + (RepeatModes)Repeat;
+            return Name + " " + Date + " " + (RepeatModes)Repeat + " " + StopResult;
         }
     }
 }

@@ -77,7 +77,7 @@
             this.buttonFindCppInMak.Name = "buttonFindCppInMak";
             this.buttonFindCppInMak.Size = new System.Drawing.Size(178, 23);
             this.buttonFindCppInMak.TabIndex = 1;
-            this.buttonFindCppInMak.Text = "(.c .cpp) without (.mak .inc)";
+            this.buttonFindCppInMak.Text = "(.c .cpp) - (.mak .inc)";
             this.buttonFindCppInMak.UseVisualStyleBackColor = true;
             this.buttonFindCppInMak.Click += new System.EventHandler(this.button1_Click);
             // 
@@ -104,7 +104,7 @@
             this.buttonFindHppInCpp.Name = "buttonFindHppInCpp";
             this.buttonFindHppInCpp.Size = new System.Drawing.Size(178, 23);
             this.buttonFindHppInCpp.TabIndex = 5;
-            this.buttonFindHppInCpp.Text = "(.h .hpp) without (.c .cpp .h .hpp)";
+            this.buttonFindHppInCpp.Text = "(.h .hpp) - (.c .cpp .h .hpp .rec .rc)";
             this.buttonFindHppInCpp.UseVisualStyleBackColor = true;
             this.buttonFindHppInCpp.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -122,7 +122,7 @@
             this.buttonFindForInAll.Name = "buttonFindForInAll";
             this.buttonFindForInAll.Size = new System.Drawing.Size(178, 23);
             this.buttonFindForInAll.TabIndex = 16;
-            this.buttonFindForInAll.Text = "(.for) without (.c .cpp .rc .h .hpp)";
+            this.buttonFindForInAll.Text = "(.for) - (.c .cpp .rc .h .hpp .rec .rc)";
             this.buttonFindForInAll.UseVisualStyleBackColor = true;
             this.buttonFindForInAll.Click += new System.EventHandler(this.button6_Click);
             // 

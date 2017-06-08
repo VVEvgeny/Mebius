@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Windows.Forms;
+using Tasks.Database;
+using Tasks.Database.Models;
+using Tasks.Lib.Base;
 using static System.Reflection.MethodBase;
 using static BMTools.BmDebug;
 
 namespace Tasks
 {
-    public class TaskDisp
+    public class JobDisp
     {
+        private readonly IUnitOfWork _unitOfWork;
+        public IEnumerable<IMebiusTaskBase> MebiusTaskBases;
         private enum DispStates
         {
             None,
@@ -18,7 +23,7 @@ namespace Tasks
         }
         private DispStates _state = DispStates.None;
 
-        private class TaskDispItem
+        public class JobDispItem
         {
             public enum StateStates
             {
@@ -28,55 +33,71 @@ namespace Tasks
             }
             public int IdInList { get; set; }
             public string Name { get; set; }
+            public string Task { get; set; }
             public DateTime Date { get; set; }
             public int Repeat { get; set; }
             public string StateText { get; set; }
             public StateStates State = StateStates.None;
             public string PrevStateText { get; set; }
             public string StopResult { get; set; }
+            public string ErrorResult { get; set; }
+            public string Param { get; set; }
 
-            public static TaskDispItem Map(Task task)
+            public static JobDispItem Map(Job job)
             {
-                return new TaskDispItem
+                return new JobDispItem
                 {
-                    Name = task.Name,
-                    Date = task.Date,
-                    Repeat = task.Repeat,
-                    StopResult = task.StopResult
+                    Name = job.Name,
+                    Task = job.Task,
+                    Date = job.Date,
+                    Repeat = job.Repeat,
+                    StopResult = job.StopResult,
+                    ErrorResult = job.ErrorResult,
+                    Param = job.Param
                 };
             }
 
             public override string ToString()
             {
-                return IdInList + " " + Name + " " + Date + " " + (Task.RepeatModes)Repeat + " " + StateText + " " + PrevStateText + " " + StopResult;
+                return "IdInList=" + IdInList + ";"
+                       + "Name=" + Name + ";"
+                       + "Task=" + Task + ";"
+                       + "Date=" + Date + ";"
+                       + "Repeat=" + (Job.RepeatModes) Repeat + ";"
+                       + "StopResult=" + StopResult + ";"
+                       + "ErrorResult=" + ErrorResult + ";"
+                       + "Param=" + Param + ";"
+                       + "StateText=" + StateText + ";"
+                       + "PrevStateText=" + PrevStateText + ";"
+                    ;
             }
 
             public bool NeedExec()
             {
-                switch ((Task.RepeatModes)Repeat)
+                switch ((Job.RepeatModes)Repeat)
                 {
-                    case Task.RepeatModes.Once:
+                    case Job.RepeatModes.Once:
                         return DateTime.Now.Year == Date.Year && DateTime.Now.Month == Date.Month &&
                                DateTime.Now.Day == Date.Day && DateTime.Now.Hour == Date.Hour &&
                                DateTime.Now.Minute == Date.Minute && DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryHalfMinute:
+                    case Job.RepeatModes.EveryHalfMinute:
                         return DateTime.Now.Second == Date.Second || DateTime.Now.Second - 30 == Date.Second;
-                    case Task.RepeatModes.EveryMinute:
+                    case Job.RepeatModes.EveryMinute:
                         return DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryHalfHour:
+                    case Job.RepeatModes.EveryHalfHour:
                         return (DateTime.Now.Minute == Date.Minute || DateTime.Now.Minute - 30 == Date.Minute) && DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryHour:
+                    case Job.RepeatModes.EveryHour:
                         return DateTime.Now.Minute == Date.Minute && DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryHalfDay:
+                    case Job.RepeatModes.EveryHalfDay:
                         return (DateTime.Now.Hour == Date.Hour || DateTime.Now.Hour - 12 == Date.Hour) &&
                                DateTime.Now.Minute == Date.Minute && DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryDay:
+                    case Job.RepeatModes.EveryDay:
                         return DateTime.Now.Hour == Date.Hour && DateTime.Now.Minute == Date.Minute && DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryThirdDay:
+                    case Job.RepeatModes.EveryThirdDay:
                         return (DateTime.Now.Hour == Date.Hour || DateTime.Now.Hour - 8 == Date.Hour ||
                                 DateTime.Now.Hour + 8 == Date.Hour) && DateTime.Now.Minute == Date.Minute &&
                                DateTime.Now.Second == Date.Second;
-                    case Task.RepeatModes.EveryFourthDay:
+                    case Job.RepeatModes.EveryFourthDay:
                         return (DateTime.Now.Hour == Date.Hour || DateTime.Now.Hour - 6 == Date.Hour ||
                                 DateTime.Now.Hour + 6 == Date.Hour || DateTime.Now.Hour - 12 == Date.Hour ||
                                 DateTime.Now.Hour + 12 == Date.Hour) &&
@@ -89,56 +110,60 @@ namespace Tasks
             public DateTime GetNearDate()
             {
                 var nearDate = Date;
-                switch ((Task.RepeatModes)Repeat)
+                switch ((Job.RepeatModes) Repeat)
                 {
-                    case Task.RepeatModes.Once:
-                        break;
-                    case Task.RepeatModes.EveryHalfMinute:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, Date.Second);
+                    case Job.RepeatModes.EveryHalfMinute:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
+                            DateTime.Now.Hour, DateTime.Now.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddSeconds(30);
                         break;
-                    case Task.RepeatModes.EveryMinute:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, Date.Second);
+                    case Job.RepeatModes.EveryMinute:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
+                            DateTime.Now.Hour, DateTime.Now.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddMinutes(1);
                         break;
-                    case Task.RepeatModes.EveryHalfHour:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryHalfHour:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
+                            DateTime.Now.Hour, Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddMinutes(30);
                         break;
-                    case Task.RepeatModes.EveryHour:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryHour:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day,
+                            DateTime.Now.Hour, Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddHours(1);
                         break;
-                    case Task.RepeatModes.EveryHalfDay:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryHalfDay:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour,
+                            Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddHours(12);
                         break;
-                    case Task.RepeatModes.EveryDay:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryDay:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour,
+                            Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddDays(1);
                         break;
-                    case Task.RepeatModes.EveryThirdDay:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryThirdDay:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour,
+                            Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddHours(8);
                         break;
-                    case Task.RepeatModes.EveryFourthDay:
-                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour, Date.Minute, Date.Second);
+                    case Job.RepeatModes.EveryFourthDay:
+                        nearDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, Date.Hour,
+                            Date.Minute, Date.Second);
                         if (nearDate < DateTime.Now) nearDate = nearDate.AddHours(6);
                         break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
                 return nearDate;
             }
         }
 
-        private class MyList : List<TaskDispItem>
+        private class MyList : List<JobDispItem>
         {
-            public delegate void ItemAddedEventHandler(TaskDispItem item);
+            public delegate void ItemAddedEventHandler(JobDispItem item);
 
             public event ItemAddedEventHandler Added;
 
-            public new void Add(TaskDispItem item)
+            public new void Add(JobDispItem item)
             {
                 base.Add(item);
                 Added?.Invoke(item);
@@ -146,28 +171,32 @@ namespace Tasks
         }
         private readonly MyList _taskDispItem = new MyList();
 
-        private readonly ListView _listview;
-        public TaskDisp(ListView listview)
+        public ListView ListView { private get; set; }
+
+        public JobDisp(IUnitOfWork unitOfWork)
         {
-            _listview = listview;
+            Debug.InfoAsync(GetCurrentMethod());
+
+
+            _unitOfWork = unitOfWork;
             _taskDispItem.Added += item =>
             {
                 if (_state == DispStates.Running) ThreadPool.QueueUserWorkItem(Calculate, item);
             };
         }
 
-        public void LoadTasks()
+        public async void LoadJobs()
         {
             Debug.InfoAsync(GetCurrentMethod());
 
-            if (_state != DispStates.None && _state != DispStates.Aborted) throw new Exception("Invalid state=" + _state);
+            if (_state != DispStates.None && _state != DispStates.Aborted)
+                throw new Exception("Invalid state=" + _state);
 
-            using (var db = new DatabaseContext())
+            var allJobs = await _unitOfWork.JobRepository.GetAllAsync();
+
+            foreach (var task in allJobs)
             {
-                foreach (var task in db.Tasks)
-                {
-                    Add(task);
-                }
+                Add(JobDispItem.Map(task));
             }
 
             _state = DispStates.Loaded;
@@ -175,18 +204,18 @@ namespace Tasks
 
         private void UpdateListViewState(int id, string state)
         {
-            _listview.BeginInvoke((MethodInvoker)(() => _listview.Items[id].SubItems[2].Text = state));
+            ListView.BeginInvoke((MethodInvoker)(() => ListView.Items[id].SubItems[4].Text = state));
         }
         private void UpdateListViewPrevState(int id, string state)
         {
-            _listview.BeginInvoke((MethodInvoker)(() => _listview.Items[id].SubItems[3].Text = state));
+            ListView.BeginInvoke((MethodInvoker)(() => ListView.Items[id].SubItems[5].Text = state));
         }
 
-        private void Exec(TaskDispItem item)
+        private void Exec(JobDispItem item)
         {
             Debug.InfoAsync(GetCurrentMethod(), item);
 
-            item.PrevStateText = Files.GetStatusPm("04300020");
+            item.PrevStateText = MebiusTaskBases.Get(item.Task.RemoveSplitUppers()).Exec(item.Param);
 
             Debug.InfoAsync(GetCurrentMethod(), "result=", item.PrevStateText);
 
@@ -194,22 +223,27 @@ namespace Tasks
 
             if (item.PrevStateText == item.StopResult)
             {
-                item.StateText = "Ended by result";
-                item.State = TaskDispItem.StateStates.Ended;
+                item.StateText = "Ended by Stop result";
+                item.State = JobDispItem.StateStates.Ended;
+            }
+            else if (item.PrevStateText == item.ErrorResult)
+            {
+                item.StateText = "Ended by Error result";
+                item.State = JobDispItem.StateStates.Ended;
             }
         }
-        private void ExecWait(TaskDispItem item)
+        private void ExecWait(JobDispItem item)
         {
             //Debug.InfoAsync(GetCurrentMethod(), item);
 
-            if ((Task.RepeatModes)item.Repeat == Task.RepeatModes.Once && DateTime.Now > item.Date)
+            if ((Job.RepeatModes)item.Repeat == Job.RepeatModes.Once && DateTime.Now > item.Date)
             {
                 item.StateText = "Ended by time";
-                item.State = TaskDispItem.StateStates.Ended;
+                item.State = JobDispItem.StateStates.Ended;
             }
             else
             {
-                item.State = TaskDispItem.StateStates.Working;
+                item.State = JobDispItem.StateStates.Working;
                 var ts = item.GetNearDate() - DateTime.Now;
                 item.StateText = "To exec=" + ts.ToTime();
             }
@@ -217,18 +251,18 @@ namespace Tasks
 
         private void Calculate(object state)
         {
-            var item = state as TaskDispItem;
+            var item = state as JobDispItem;
             if (item == null)
-                throw new NullReferenceException("Calculate(object state) item(TaskDispItem) == null");
+                throw new NullReferenceException("Calculate(object state) item(JobDispItem) == null");
 
             Debug.InfoAsync(GetCurrentMethod(), item, Thread.CurrentThread.ManagedThreadId);
 
-            for (; item.State != TaskDispItem.StateStates.Ended;)
+            for (; item.State != JobDispItem.StateStates.Ended;)
             {
                 if (_state == DispStates.Aborted)
                 {
                     item.StateText = "Ended by Abort";
-                    item.State = TaskDispItem.StateStates.Ended;
+                    item.State = JobDispItem.StateStates.Ended;
                 }
                 else
                 {
@@ -243,7 +277,7 @@ namespace Tasks
                 }
                 UpdateListViewState(item.IdInList, item.StateText);
 
-                if (item.State != TaskDispItem.StateStates.Ended)
+                if (item.State != JobDispItem.StateStates.Ended)
                 {
                     Thread.Sleep(1000);
                 }
@@ -253,12 +287,13 @@ namespace Tasks
         public void Run()
         {
             Debug.InfoAsync(GetCurrentMethod(), _state);
+            if (_state == DispStates.None) LoadJobs();
             if (_state != DispStates.Loaded && _state != DispStates.Aborted) throw new Exception("Invalid state=" + _state);
             _state = DispStates.Running;
 
             foreach (var item in _taskDispItem)
             {
-                item.State = TaskDispItem.StateStates.None;
+                item.State = JobDispItem.StateStates.None;
                 item.PrevStateText = item.StateText;
                 UpdateListViewPrevState(item.IdInList, item.PrevStateText);
                 ThreadPool.QueueUserWorkItem(Calculate, item);
@@ -271,15 +306,19 @@ namespace Tasks
             _state = DispStates.Aborted;
         }
 
-        public void Add(Task task)
+
+        public void Add(JobDispItem item)
         {
-            Debug.InfoAsync(GetCurrentMethod(), task);
+            Debug.InfoAsync(GetCurrentMethod(), item);
 
-            var item = TaskDispItem.Map(task);
-            _listview.Items.Add(new ListViewItem(new[] { item.Name, ((Task.RepeatModes)item.Repeat).ToString(), item.StateText, item.PrevStateText }));
-            item.IdInList = _listview.Items.Count - 1;
-
-            _taskDispItem.Add(item);
+            ListView.BeginInvoke((MethodInvoker)(() =>
+            {
+                ListView.Items.Add(
+                    new ListViewItem(new[]
+                    {item.Name, item.Task.SplitUppers(), item.Param, ((Job.RepeatModes) item.Repeat).ToString().SplitUppers(), item.StateText.SplitUppers(), item.PrevStateText.SplitUppers()}));
+                item.IdInList = ListView.Items.Count - 1;
+                _taskDispItem.Add(item);
+            }));
         }
     }
 

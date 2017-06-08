@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Jobs")]
+[assembly: AssemblyTitle("Tasks.Lib.MebiusPMStatus")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Jobs")]
+[assembly: AssemblyProduct("Tasks.Lib.MebiusPMStatus")]
 [assembly: AssemblyCopyright("Copyright ©  2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6d74e0ce-ae3f-4ec2-bb2d-8f528c559a5a")]
+[assembly: Guid("0f4b5fb8-cc95-4107-9db3-47f7065a86e1")]
 
 // Version information for an assembly consists of the following four values:
 //

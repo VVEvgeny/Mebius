@@ -17,7 +17,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CreateParamsSQL", "CreatePa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerformanceTest", "PerformanceTest\PerformanceTest.csproj", "{BA0CE842-43BA-4FF5-A82A-C94666F4859C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks", "Tasks\Tasks.csproj", "{6D74E0CE-AE3F-4EC2-BB2D-8F528C559A5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.Windows", "Tasks\Tasks.Windows.csproj", "{6D74E0CE-AE3F-4EC2-BB2D-8F528C559A5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.Lib.MebiusPmStatus", "Tasks.Lib.MebiusPMStatus\Tasks.Lib.MebiusPmStatus.csproj", "{0F4B5FB8-CC95-4107-9DB3-47F7065A86E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.Database", "Tasks.Database\Tasks.Database.csproj", "{9C78B1B2-92A3-43D5-A17E-2C895A189CB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks.Lib.Base", "Tasks.Lib.Base\Tasks.Lib.Base.csproj", "{56FAB44F-25D5-42CB-ACB4-740EA1F5ADCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,6 +63,18 @@ Global
 		{6D74E0CE-AE3F-4EC2-BB2D-8F528C559A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D74E0CE-AE3F-4EC2-BB2D-8F528C559A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D74E0CE-AE3F-4EC2-BB2D-8F528C559A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F4B5FB8-CC95-4107-9DB3-47F7065A86E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F4B5FB8-CC95-4107-9DB3-47F7065A86E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F4B5FB8-CC95-4107-9DB3-47F7065A86E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F4B5FB8-CC95-4107-9DB3-47F7065A86E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C78B1B2-92A3-43D5-A17E-2C895A189CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C78B1B2-92A3-43D5-A17E-2C895A189CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C78B1B2-92A3-43D5-A17E-2C895A189CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C78B1B2-92A3-43D5-A17E-2C895A189CB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{56FAB44F-25D5-42CB-ACB4-740EA1F5ADCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56FAB44F-25D5-42CB-ACB4-740EA1F5ADCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56FAB44F-25D5-42CB-ACB4-740EA1F5ADCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56FAB44F-25D5-42CB-ACB4-740EA1F5ADCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

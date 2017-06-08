@@ -36,6 +36,8 @@
             this.columnHeaderState = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeaderPrev = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.buttonStart = new System.Windows.Forms.Button();
+            this.columnHeaderParam = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeaderTask = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,14 +54,16 @@
             // addTaskToolStripMenuItem
             // 
             this.addTaskToolStripMenuItem.Name = "addTaskToolStripMenuItem";
-            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
-            this.addTaskToolStripMenuItem.Text = "Add Task";
+            this.addTaskToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
+            this.addTaskToolStripMenuItem.Text = "Add Job";
             this.addTaskToolStripMenuItem.Click += new System.EventHandler(this.addTaskToolStripMenuItem_Click);
             // 
             // listView
             // 
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeaderName,
+            this.columnHeaderTask,
+            this.columnHeaderParam,
             this.columnHeaderRepeat,
             this.columnHeaderState,
             this.columnHeaderPrev});
@@ -69,13 +73,14 @@
             this.listView.Name = "listView";
             this.listView.Size = new System.Drawing.Size(834, 272);
             this.listView.TabIndex = 1;
+            this.listView.Tag = "123";
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
             // 
             // columnHeaderName
             // 
             this.columnHeaderName.Text = "Name";
-            this.columnHeaderName.Width = 413;
+            this.columnHeaderName.Width = 182;
             // 
             // columnHeaderRepeat
             // 
@@ -90,7 +95,7 @@
             // columnHeaderPrev
             // 
             this.columnHeaderPrev.Text = "Prev";
-            this.columnHeaderPrev.Width = 129;
+            this.columnHeaderPrev.Width = 124;
             // 
             // buttonStart
             // 
@@ -101,6 +106,16 @@
             this.buttonStart.Text = "Start";
             this.buttonStart.UseVisualStyleBackColor = true;
             this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
+            // 
+            // columnHeaderParam
+            // 
+            this.columnHeaderParam.Text = "Param";
+            this.columnHeaderParam.Width = 103;
+            // 
+            // columnHeaderTask
+            // 
+            this.columnHeaderTask.Text = "Task";
+            this.columnHeaderTask.Width = 160;
             // 
             // MainForm
             // 
@@ -131,6 +146,8 @@
         private System.Windows.Forms.ColumnHeader columnHeaderPrev;
         private System.Windows.Forms.ToolStripMenuItem addTaskToolStripMenuItem;
         private System.Windows.Forms.Button buttonStart;
+        private System.Windows.Forms.ColumnHeader columnHeaderParam;
+        private System.Windows.Forms.ColumnHeader columnHeaderTask;
     }
 }
 

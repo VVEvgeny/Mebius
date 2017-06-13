@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Threading.Tasks;
+using Tasks.Database.Models;
+using static BMTools.BmDebug;
 
 namespace Tasks.Database
 {
@@ -11,13 +14,13 @@ namespace Tasks.Database
 
         #region Private Repos (add one per entity)
 
-        private EfGenericRepository<Models.Job> _jobRepo;
+        private EfGenericRepository<Job> _jobRepo;
 
         #endregion
 
         #region Public DbSets (add one per entity)
 
-        public DbSet<Models.Job> Jobs { get; set; }
+        public DbSet<Job> Jobs { get; set; }
 
         #endregion
 
@@ -26,13 +29,21 @@ namespace Tasks.Database
         public EfUnitOfWork() : base("DBConnection")
         {
             Database = base.Database;
+
+            //Database.Log = s => Debug.InfoAsync(s); //System.Diagnostics.Debug.WriteLine(s);
+        }
+        public EfUnitOfWork(DbConnection connection) : base(connection, true)
+        {
+            Database = base.Database;
+
+            //Database.Log = s => Debug.InfoAsync(s); //System.Diagnostics.Debug.WriteLine(s);
         }
 
         #endregion
 
         #region IUnitOfWork Implementation (add one per entity)
 
-        public IGenericRepository<Models.Job> JobRepository => _jobRepo ?? (_jobRepo = new EfGenericRepository<Models.Job>(Jobs));
+        public IGenericRepository<Job> JobRepository => _jobRepo ?? (_jobRepo = new EfGenericRepository<Job>(Jobs));
 
         #endregion
 
@@ -62,16 +73,11 @@ namespace Tasks.Database
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            /*
-            System.Data.Entity.Database.SetInitializer<EfUnitOfWork>(null);
-
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
-            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
-
-            modelBuilder.Entity<Job>();
-            */
+            //System.Data.Entity.Database.SetInitializer<EfUnitOfWork>(null);
+            //base.OnModelCreating(modelBuilder);
+            //modelBuilder.Conventions.Remove<OneToManyCascadeDeleteConvention>();
+            //modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            //modelBuilder.Entity<Job>();
         }
 
         #endregion

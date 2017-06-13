@@ -42,6 +42,7 @@
             this.textBoxName = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.dateTimePickerDate = new System.Windows.Forms.DateTimePicker();
+            this.buttonSettings = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // comboBoxTask
@@ -65,17 +66,18 @@
             // 
             // buttonAdd
             // 
-            this.buttonAdd.Location = new System.Drawing.Point(197, 226);
+            this.buttonAdd.Location = new System.Drawing.Point(197, 198);
             this.buttonAdd.Name = "buttonAdd";
             this.buttonAdd.Size = new System.Drawing.Size(75, 23);
             this.buttonAdd.TabIndex = 2;
             this.buttonAdd.Text = "Add";
             this.buttonAdd.UseVisualStyleBackColor = true;
+            this.buttonAdd.Click += new System.EventHandler(this.buttonAdd_Click);
             // 
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(6, 226);
+            this.buttonCancel.Location = new System.Drawing.Point(7, 198);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 23);
             this.buttonCancel.TabIndex = 3;
@@ -170,13 +172,25 @@
             this.dateTimePickerDate.Size = new System.Drawing.Size(221, 20);
             this.dateTimePickerDate.TabIndex = 13;
             // 
+            // buttonSettings
+            // 
+            this.buttonSettings.Enabled = false;
+            this.buttonSettings.Location = new System.Drawing.Point(197, 169);
+            this.buttonSettings.Name = "buttonSettings";
+            this.buttonSettings.Size = new System.Drawing.Size(75, 23);
+            this.buttonSettings.TabIndex = 14;
+            this.buttonSettings.Text = "Settings";
+            this.buttonSettings.UseVisualStyleBackColor = true;
+            this.buttonSettings.Click += new System.EventHandler(this.buttonSettings_Click);
+            // 
             // AddForm
             // 
             this.AcceptButton = this.buttonAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(284, 225);
+            this.Controls.Add(this.buttonSettings);
             this.Controls.Add(this.dateTimePickerDate);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.textBoxName);
@@ -191,8 +205,11 @@
             this.Controls.Add(this.buttonAdd);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.comboBoxTask);
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "AddForm";
-            this.Text = "AddForm";
+            this.ShowIcon = false;
+            this.Text = "Add Job";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -214,5 +231,6 @@
         private System.Windows.Forms.TextBox textBoxName;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.DateTimePicker dateTimePickerDate;
+        private System.Windows.Forms.Button buttonSettings;
     }
 }

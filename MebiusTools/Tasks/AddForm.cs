@@ -61,6 +61,8 @@ namespace Tasks
 
         private void comboBoxTask_SelectedIndexChanged(object sender, EventArgs e)
         {
+            buttonSettings.Enabled = _iMebiusTaskBases.Get(comboBoxTask.Text.RemoveSplitUppers()).HaveSettings;
+
             comboBoxStopResult.Items.Clear();
             comboBoxStopResult.Items.Add(string.Empty);
 
@@ -70,6 +72,26 @@ namespace Tasks
             }
 
             comboBoxStopResult.Text = string.Empty;
+        }
+
+        private string _settings = string.Empty;
+        public string GetSettings()
+        {
+            return _settings;
+        }
+
+        private void buttonSettings_Click(object sender, EventArgs e)
+        {
+            _settings = _iMebiusTaskBases.Get(comboBoxTask.Text.RemoveSplitUppers()).GetSettings();
+        }
+
+        private void buttonAdd_Click(object sender, EventArgs e)
+        {
+            if (_iMebiusTaskBases.Get(comboBoxTask.Text.RemoveSplitUppers()).HaveSettings && _settings == string.Empty)
+            {
+                MessageBox.Show("Need fill settings");
+                DialogResult = DialogResult.None;
+            }
         }
     }
 }

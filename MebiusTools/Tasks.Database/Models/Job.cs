@@ -15,6 +15,8 @@ namespace Tasks.Database.Models
         [Required]
         public string Task { get; set; }
 
+        public string Settings { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 

@@ -5,6 +5,15 @@ using Tasks.Lib.Base;
 
 namespace Tasks.Lib.MebiusPMStatus
 {
+    [Serializable]
+    public class MebiusPmStatusSettings
+    {
+        public string PathBuilded = @"patches\accept\";
+        public string PathCommit = @"patches\commit\done\";
+        public string PathReject = @"patches\reject\";
+        public string PathBuilding = @"patches\send\";
+        public string EtalonPath = "\\\\linux3\\src\\etalon.$$$\\";
+    }
     public class MebiusPmStatus: IMebiusTaskBase
     {
         private enum Results
@@ -15,38 +24,35 @@ namespace Tasks.Lib.MebiusPMStatus
             Builded,
             Building
         }
-        private static string PATH_ACCEPT = @"patches\accept\";
-        private static string PATH_COMMIT = @"patches\commit\done\";
-        private static string PATH_REJECT = @"patches\reject\";
-        private static string PATH_SEND = @"patches\send\";
-        private static string etalonPath = "\\\\linux3\\src\\etalon.043\\";
-
 
         public string Name => GetType().Name;
         public string ErrorResult => Results.Unknown.ToString();
-        public string Exec(string param)
+
+        private string GetPathFile(string etalonPath, string dirPath, string pm)
         {
-            
-            if (File.Exists(etalonPath + PATH_COMMIT + param + ".tar"))
-            {
-                return Results.Commited.ToString();
-            }
-            if (File.Exists(etalonPath + PATH_REJECT + param + ".tar"))
-            {
-                return Results.Rejected.ToString();
-            }
-            if (File.Exists(etalonPath + PATH_ACCEPT + param + ".tar"))
-            {
-                return Results.Builded.ToString();
-            }
-            if (File.Exists(etalonPath + PATH_SEND + param + ".tar"))
-            {
-                return Results.Building.ToString();
-            }
+            return etalonPath.Replace("$$$", pm.Substring(0, 3)) + dirPath + pm + ".tar";
+        }
+
+        public string Exec(string pm, string _settings)
+        {
+            //if (settings == null) throw new ArgumentNullException(nameof(_settings));
+            //var settings = JsonConvert.DeserializeObject<MebiusPmStatusSettings>(_settings);
+            //if (settings == null) throw new InvalidCastException("settings is not MebiusPmStatusSettings=" + _settings);
+            var settings = new MebiusPmStatusSettings();
+
+            if (File.Exists(GetPathFile(settings.EtalonPath, settings.PathCommit, pm))) return Results.Commited.ToString();
+            if (File.Exists(GetPathFile(settings.EtalonPath, settings.PathReject, pm))) return Results.Rejected.ToString();
+            if (File.Exists(GetPathFile(settings.EtalonPath, settings.PathBuilded, pm))) return Results.Builded.ToString();
+            if (File.Exists(GetPathFile(settings.EtalonPath, settings.PathBuilding, pm))) return Results.Building.ToString();
 
             return Results.Unknown.ToString();
         }
 
         public IEnumerable<string> GetResults => Enum.GetNames(typeof(Results));
+        public bool HaveSettings => false;
+        public string GetSettings()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -76,35 +76,35 @@ namespace Tasks.Database
             return _dbSet.FindAsync(id);
         }
 
+        public void Add(T entity)
+        {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
+            _dbSet.Add(entity);
+        }
+
         public Task AddAsync(T entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             return Task.Run(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException("entity");
-
                 _dbSet.Add(entity);
             });
         }
 
         public Task DeleteAsync(T entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             return Task.Run(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException("entity");
-
                 _dbSet.Remove(entity);
             });
         }
 
         public Task AttachAsync(T entity)
         {
+            if (entity == null) throw new ArgumentNullException(nameof(entity));
             return Task.Run(() =>
             {
-                if (entity == null)
-                    throw new ArgumentNullException("entity");
-
                 _dbSet.Attach(entity);
             });
         }

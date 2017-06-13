@@ -21,6 +21,7 @@ namespace Tasks.Database
         Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
         Task<T> GetByIdAsync(int id);
 
+        void Add(T entity);
         Task AddAsync(T entity);
         Task DeleteAsync(T entity);
         Task AttachAsync(T entity);

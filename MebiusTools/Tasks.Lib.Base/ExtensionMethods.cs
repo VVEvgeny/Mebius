@@ -8,6 +8,10 @@ namespace Tasks.Lib.Base
 {
     public static class TasksExtensions
     {
+        public static string ToTime(this TimeSpan ts)
+        {
+            return ts.ToString(@"dd\.hh\:mm\:ss");
+        }
         public static IMebiusTaskBase Get(this IEnumerable<IMebiusTaskBase> iMebiusTaskBases, string name)
         {
             foreach (var t in iMebiusTaskBases)

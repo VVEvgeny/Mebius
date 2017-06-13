@@ -42,9 +42,11 @@ namespace Tasks
             public string StopResult { get; set; }
             public string ErrorResult { get; set; }
             public string Param { get; set; }
+            public string Settings { get; set; }
 
             public static JobDispItem Map(Job job)
             {
+                if (job == null) throw new ArgumentNullException(nameof(job));
                 return new JobDispItem
                 {
                     Name = job.Name,
@@ -53,7 +55,8 @@ namespace Tasks
                     Repeat = job.Repeat,
                     StopResult = job.StopResult,
                     ErrorResult = job.ErrorResult,
-                    Param = job.Param
+                    Param = job.Param,
+                    Settings = job.Settings
                 };
             }
 
@@ -165,6 +168,7 @@ namespace Tasks
 
             public new void Add(JobDispItem item)
             {
+                if (item == null) throw new ArgumentNullException(nameof(item));
                 base.Add(item);
                 Added?.Invoke(item);
             }
@@ -204,18 +208,22 @@ namespace Tasks
 
         private void UpdateListViewState(int id, string state)
         {
+            //if (state == null) throw new ArgumentNullException(nameof(state));
             ListView.BeginInvoke((MethodInvoker)(() => ListView.Items[id].SubItems[4].Text = state));
         }
+
         private void UpdateListViewPrevState(int id, string state)
         {
+            //if (state == null) throw new ArgumentNullException(nameof(state));
             ListView.BeginInvoke((MethodInvoker)(() => ListView.Items[id].SubItems[5].Text = state));
         }
 
         private void Exec(JobDispItem item)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
             Debug.InfoAsync(GetCurrentMethod(), item);
 
-            item.PrevStateText = MebiusTaskBases.Get(item.Task.RemoveSplitUppers()).Exec(item.Param);
+            item.PrevStateText = MebiusTaskBases.Get(item.Task.RemoveSplitUppers()).Exec(item.Param, item.Settings);
 
             Debug.InfoAsync(GetCurrentMethod(), "result=", item.PrevStateText);
 
@@ -234,6 +242,7 @@ namespace Tasks
         }
         private void ExecWait(JobDispItem item)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
             //Debug.InfoAsync(GetCurrentMethod(), item);
 
             if ((Job.RepeatModes)item.Repeat == Job.RepeatModes.Once && DateTime.Now > item.Date)
@@ -251,6 +260,7 @@ namespace Tasks
 
         private void Calculate(object state)
         {
+            if (state == null) throw new ArgumentNullException(nameof(state));
             var item = state as JobDispItem;
             if (item == null)
                 throw new NullReferenceException("Calculate(object state) item(JobDispItem) == null");
@@ -309,6 +319,7 @@ namespace Tasks
 
         public void Add(JobDispItem item)
         {
+            if (item == null) throw new ArgumentNullException(nameof(item));
             Debug.InfoAsync(GetCurrentMethod(), item);
 
             ListView.BeginInvoke((MethodInvoker)(() =>

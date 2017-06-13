@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tasks.Database;
@@ -19,7 +18,6 @@ namespace Tasks
         private readonly IEnumerable<IMebiusTaskBase> _tasks = new List<IMebiusTaskBase>
         {
             new MebiusPmStatus(),
-            new MebiusPmStatus2()
         };
         public MainForm(IUnitOfWork unitOfWork)
         {
@@ -54,46 +52,36 @@ namespace Tasks
             }
         }
 
-        public class MebiusPmStatus2: IMebiusTaskBase
+        public async void AddTask(Job t)
         {
-            public string Name => "TEST";
-            public string ErrorResult => Results.End.ToString();
-            public string Exec(string param)
-            {
-                return Results.End.ToString();
-            }
+            _jobDisp.Add(JobDisp.JobDispItem.Map(t));
 
-            private enum Results
-            {
-                Error,
-                End,
-                Result1,
-                ResultN
-            }
-            public IEnumerable<string> GetResults => Enum.GetNames(typeof(Results));
+            //Task.WaitAll(_unitOfWork.JobRepository.AddAsync(t)); //commit only after add...
+            //_unitOfWork.JobRepository.AddAsync(t).Wait();
+            _unitOfWork.JobRepository.Add(t);
+            await _unitOfWork.CommitAsync();
         }
-
-        private async void addTaskToolStripMenuItem_Click(object sender, EventArgs e)
+            
+        private void addTaskToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var form = new AddForm(_tasks, Job.GetRepeatseEnumerable.SplitUppers());
-
-            if (form.ShowDialog() == DialogResult.OK)
+            using (var form = new AddForm(_tasks, Job.GetRepeatseEnumerable.SplitUppers()))
             {
-                var t = new Job
+                if (form.ShowDialog() == DialogResult.OK)
                 {
-                    Name = form.GetName(),
-                    Task = form.GetTask().RemoveSplitUppers(),
-                    Repeat = (int) Enum.Parse(typeof(Job.RepeatModes), form.GetRepeat().RemoveSplitUppers()),
-                    StopResult = form.GetStopResult().RemoveSplitUppers(),
-                    ErrorResult = _tasks.Get(form.GetTask().RemoveSplitUppers()).ErrorResult,
-                    Date = form.GetDate(),
-                    Param = form.GetParam()
-                };
+                    var t = new Job
+                    {
+                        Name = form.GetName(),
+                        Task = form.GetTask().RemoveSplitUppers(),
+                        Repeat = (int) Enum.Parse(typeof(Job.RepeatModes), form.GetRepeat().RemoveSplitUppers()),
+                        StopResult = form.GetStopResult().RemoveSplitUppers(),
+                        ErrorResult = _tasks.Get(form.GetTask().RemoveSplitUppers()).ErrorResult,
+                        Date = form.GetDate(),
+                        Param = form.GetParam(),
+                        Settings = form.GetSettings()
+                    };
 
-                _jobDisp.Add(JobDisp.JobDispItem.Map(t));
-
-                Task.WaitAll(_unitOfWork.JobRepository.AddAsync(t)); //commit only after add...
-                await _unitOfWork.CommitAsync();
+                    AddTask(t);
+                }
             }
         }
     }

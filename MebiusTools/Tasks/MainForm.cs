@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tasks.Database;
 using Tasks.Database.Models;
 using Tasks.Lib.Base;
 using Tasks.Lib.MebiusPMStatus;
-using static BMTools.BmDebug;
-using static System.Reflection.MethodBase;
 
 namespace Tasks
 {
@@ -52,13 +49,12 @@ namespace Tasks
             }
         }
 
-        public async void AddTask(Job t)
+        private async void AddTask(Job t)
         {
             _jobDisp.Add(JobDisp.JobDispItem.Map(t));
 
             //Task.WaitAll(_unitOfWork.JobRepository.AddAsync(t)); //commit only after add...
-            //_unitOfWork.JobRepository.AddAsync(t).Wait();
-            _unitOfWork.JobRepository.Add(t);
+            _unitOfWork.JobRepository.AddAsync(t).Wait();
             await _unitOfWork.CommitAsync();
         }
             

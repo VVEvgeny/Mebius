@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Tasks.Database
@@ -76,37 +77,25 @@ namespace Tasks.Database
             return _dbSet.FindAsync(id);
         }
 
-        public void Add(T entity)
-        {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
-            _dbSet.Add(entity);
-        }
-
         public Task AddAsync(T entity)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
-            return Task.Run(() =>
-            {
-                _dbSet.Add(entity);
-            });
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity) + " in " + MethodBase.GetCurrentMethod().Name);
+            return Task.Run(() => { _dbSet.Add(entity); });
         }
 
         public Task DeleteAsync(T entity)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
-            return Task.Run(() =>
-            {
-                _dbSet.Remove(entity);
-            });
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity) + " in " + MethodBase.GetCurrentMethod().Name);
+            return Task.Run(() => { _dbSet.Remove(entity); });
         }
 
         public Task AttachAsync(T entity)
         {
-            if (entity == null) throw new ArgumentNullException(nameof(entity));
-            return Task.Run(() =>
-            {
-                _dbSet.Attach(entity);
-            });
+            if (entity == null)
+                throw new ArgumentNullException(nameof(entity) + " in " + MethodBase.GetCurrentMethod().Name);
+            return Task.Run(() => { _dbSet.Attach(entity); });
         }
 
         #endregion

@@ -63,6 +63,9 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="SettingsPathes.cs" />
+    <Compile Include="WorkFileList.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

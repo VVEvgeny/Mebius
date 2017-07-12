@@ -11,10 +11,9 @@ namespace WorkCopy
 {
     public partial class MainForm : Form
     {
-        private Settings _settings;
-        private List<SettingsPathes> _pathes;
-        private readonly List<WorkFile> _workFiles;
-        private readonly List<int> _selectedList;
+        private Settings Settings { get; set; }
+        private List<SettingsPathes> Pathes { get; set; }
+        private WorkFileList WorkFiles { get; } = new WorkFileList();
 
         private class WorkFile
         {
@@ -30,19 +29,17 @@ namespace WorkCopy
         {
             InitializeComponent();
 
-            _settings = new Settings();
-            _pathes = _settings.SettingsPathes ?? new List<SettingsPathes>();
-            _workFiles = new List<WorkFile>();
-            _selectedList = new List<int>();
+            Settings = new Settings();
+            Pathes = Settings.SettingsPathes ?? new List<SettingsPathes>();
+            WorkFiles.UpdateListViewCounts += (s, e) => { allFilesToolStripMenuItem.Text = e.Count.ToString(); };
 
             LocalsToolStripItems();
         }
-
         private void toolStripMenuItemConfiguration_Click(object sender, EventArgs e)
         {
             new Setting().ShowDialog();
-            _settings = new Settings();
-            _pathes = _settings.SettingsPathes ?? new List<SettingsPathes>();
+            Settings = new Settings();
+            Pathes = Settings.SettingsPathes ?? new List<SettingsPathes>();
             LocalsToolStripItems();
         }
 
@@ -51,27 +48,27 @@ namespace WorkCopy
             compareLocalToolStripMenuItem.DropDownItems.Clear();
             compareEtalonToolStripMenuItem.DropDownItems.Clear();
 
-            for (var i = 0; i < _pathes.Count - 1; i++)
+            for (var i = 0; i < Pathes.Count - 1; i++)
             {
-                if (_pathes[i].Name == @"0") continue;
-                for (var j = i + 1; j < _pathes.Count; j++)
+                if (Pathes[i].Name == @"0") continue;
+                for (var j = i + 1; j < Pathes.Count; j++)
                 {
-                    if (_pathes[j].Name == @"0") continue;
+                    if (Pathes[j].Name == @"0") continue;
 
                     var toolStripMenuItem = new ToolStripMenuItem
                     {
-                        Name = "local" + "_" + _pathes[i].Name + "_" + _pathes[j].Name,
+                        Name = "local" + "_" + Pathes[i].Name + "_" + Pathes[j].Name,
                         Size = new System.Drawing.Size(152, 22),
-                        Text = _pathes[i].Name + @" -> " + _pathes[j].Name
+                        Text = Pathes[i].Name + @" -> " + Pathes[j].Name
                     };
                     toolStripMenuItem.Click += compareLocalToolStripMenuItem_Click;
                     compareLocalToolStripMenuItem.DropDownItems.Add(toolStripMenuItem);
 
                     var toolStripMenuItemEt = new ToolStripMenuItem
                     {
-                        Name = "etalon" + "_" + _pathes[i].Name + "_" + _pathes[j].Name,
+                        Name = "etalon" + "_" + Pathes[i].Name + "_" + Pathes[j].Name,
                         Size = new System.Drawing.Size(152, 22),
-                        Text = _pathes[i].Name + @" -> " + _pathes[j].Name
+                        Text = Pathes[i].Name + @" -> " + Pathes[j].Name
                     };
                     toolStripMenuItemEt.Click += compareLocalToolStripMenuItem_Click;
                     compareEtalonToolStripMenuItem.DropDownItems.Add(toolStripMenuItemEt);
@@ -90,15 +87,15 @@ namespace WorkCopy
 
                     var local = ((ToolStripMenuItem) sender).Name.Split('_')[0] == @"local";
 
-                    var set = GetSettingsPathesByName(_workFiles[(int) sel].VersionName);
+                    var set = GetSettingsPathesByName(WorkFiles[(int) sel].VersionName);
                     var setFrom = GetSettingsPathesByName(((ToolStripMenuItem) sender).Name.Split('_')[1]);
                     var setTo = GetSettingsPathesByName(((ToolStripMenuItem) sender).Name.Split('_')[2]);
 
                     //BMTools.BmDebug.Info(_workFiles[(int)sel].Path.Replace(set.PathLocal, setFrom.PathLocal));
                     //BMTools.BmDebug.Info(_workFiles[(int)sel].Path.Replace(set.PathLocal, setTo.PathLocal));
 
-                    RunCompare(_workFiles[(int) sel].Path.Replace(set.PathLocal, local ? setFrom.PathLocal : setFrom.PathEtalon),
-                        _workFiles[(int) sel].Path.Replace(set.PathLocal, local ? setTo.PathLocal : setTo.PathEtalon));
+                    RunCompare(WorkFiles[(int) sel].Path.Replace(set.PathLocal, local ? setFrom.PathLocal : setFrom.PathEtalon),
+                        WorkFiles[(int) sel].Path.Replace(set.PathLocal, local ? setTo.PathLocal : setTo.PathEtalon));
                 }
             }
         }
@@ -110,18 +107,19 @@ namespace WorkCopy
 
         private void LoadList(bool saveSelection = false)
         {
+            var selectedList = new List<int>();
             if (saveSelection)
             {
-                _selectedList.Clear();
+                selectedList.Clear();
                 foreach (var sel in listViewFiles.SelectedIndices)
                 {
-                    _selectedList.Add((int) sel);
+                    selectedList.Add((int) sel);
                 }
             }
 
             listViewFiles.Items.Clear();
             var num = 1;
-            foreach (var file in _workFiles)
+            foreach (var file in WorkFiles)
             {
                 listViewFiles.Items.Add(
                     new ListViewItem(new[]
@@ -131,27 +129,47 @@ namespace WorkCopy
 
             if (saveSelection)
             {
-                if (_selectedList.Count == 0) return;
+                if (selectedList.Count == 0) return;
                 for (var i = 0; i < listViewFiles.Items.Count; i++)
                 {
-                    if (_selectedList.Contains(i))
+                    if (selectedList.Contains(i))
                     {
                         listViewFiles.Items[i].Selected = true;
                         listViewFiles.Items[i].Focused = true;
                     }
                 }
             }
+            listViewFiles_SelectedIndexChanged(new object(), new EventArgs());
         }
 
         private void AddWorkFile(WorkFile workFile)
         {
+            BMTools.BmDebug.Debug.InfoAsync("add file="+ workFile.FileName);
             if (
-                !_workFiles.Exists(
+                !WorkFiles.Exists(
                     w =>
                         w.Path == workFile.Path && w.FileName == workFile.FileName &&
                         w.HomeOrBaseText == workFile.HomeOrBaseText && w.VersionName == workFile.VersionName))
             {
-                _workFiles.Add(workFile);
+                //one etalon diff h/b selector
+                if (WorkFiles.Exists(
+                    w =>
+                        w.Path == workFile.Path && w.FileName == workFile.FileName &&
+                        w.VersionName == workFile.VersionName))
+                {
+                    if (MessageBox.Show(@"File Exist in Work List =" + workFile.FileName, @"Ignore file?", MessageBoxButtons.YesNo) == DialogResult.No)
+                    {
+                        WorkFiles.Add(workFile);
+                    }
+                }
+                else
+                {
+                    WorkFiles.Add(workFile);
+                }
+            }
+            else
+            {
+                MessageBox.Show(@"File Exist in Work List =" + workFile.FileName);
             }
         }
 
@@ -214,7 +232,7 @@ namespace WorkCopy
                             if (line.ToLower().Contains("#")) continue;
                             if (line.IndexOf("./", StringComparison.Ordinal) != 0) continue;
 
-                            foreach (var path in _pathes)
+                            foreach (var path in Pathes)
                             {
                                 if (line.Contains(path.PathRemoteHome.ToUnixPath()))
                                 {
@@ -248,7 +266,7 @@ namespace WorkCopy
                     else
                     {
                         //BMTools.BmDebug.Info("NOT master file=",file);
-                        foreach (var path in _pathes)
+                        foreach (var path in Pathes)
                         {
                             //BMTools.BmDebug.Info("path.PathLocal=", path.PathLocal);
                             if (file.ToLower().Contains(path.PathLocal.ToLower()))
@@ -276,12 +294,12 @@ namespace WorkCopy
 
                 foreach (var sel in listViewFiles.SelectedIndices)
                 {
-                    pathForRemove.Add(_workFiles[(int) sel]);
+                    pathForRemove.Add(WorkFiles[(int) sel]);
                 }
 
                 foreach (var path in pathForRemove)
                 {
-                    _workFiles.Remove(path);
+                    WorkFiles.Remove(path);
                 }
                 LoadList();
             }
@@ -308,7 +326,7 @@ namespace WorkCopy
             if (e.KeyCode == Keys.Escape)
             {
                 filtrToolStripTextBox.Text = string.Empty;
-                for (var i = 0; i < _workFiles.Count; i++)
+                for (var i = 0; i < WorkFiles.Count; i++)
                 {
                     listViewFiles.Items[i].Selected = false;
                     listViewFiles.Items[i].Focused = false;
@@ -379,10 +397,10 @@ namespace WorkCopy
                 filtrToolStripTextBox.Text += e.KeyData.ToString().ToLower();
             }
             
-            for (var i = 0; i < _workFiles.Count; i++)
+            for (var i = 0; i < WorkFiles.Count; i++)
             {
-                listViewFiles.Items[i].Selected = _workFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
-                listViewFiles.Items[i].Focused = _workFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
+                listViewFiles.Items[i].Selected = WorkFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
+                listViewFiles.Items[i].Focused = WorkFiles[i].FileName.ToLower().Contains(filtrToolStripTextBox.Text);
             }
         }
         private void listViewFiles_KeyUp(object sender, KeyEventArgs e)
@@ -404,15 +422,15 @@ namespace WorkCopy
 
         private void NextEtalon(WorkFile workFile)
         {
-            if (_pathes.Count > 1)
+            if (Pathes.Count > 1)
             {
-                for (var i = 0; i < _pathes.Count; i++)
+                for (var i = 0; i < Pathes.Count; i++)
                 {
-                    if (workFile.VersionName == _pathes[i].Name)
+                    if (workFile.VersionName == Pathes[i].Name)
                     {
-                        var index = i == _pathes.Count - 1 ? 0 : i + 1;
-                        workFile.VersionName = _pathes[index].Name;
-                        workFile.Path = workFile.Path.Replace(_pathes[i].PathLocal, _pathes[index].PathLocal);
+                        var index = i == Pathes.Count - 1 ? 0 : i + 1;
+                        workFile.VersionName = Pathes[index].Name;
+                        workFile.Path = workFile.Path.Replace(Pathes[i].PathLocal, Pathes[index].PathLocal);
                         return;
                     }
                 }
@@ -426,7 +444,7 @@ namespace WorkCopy
             {
                 foreach (var sel in listViewFiles.SelectedIndices)
                 {
-                    NextEtalon(_workFiles[(int) sel]);
+                    NextEtalon(WorkFiles[(int) sel]);
                 }
                 LoadList(true);
             }
@@ -438,104 +456,103 @@ namespace WorkCopy
             {
                 foreach (var sel in listViewFiles.SelectedIndices)
                 {
-                    _workFiles[(int)sel].HomeOrBaseText = IsHomeSelector(_workFiles[(int)sel].HomeOrBaseText) ? BaseSelector : HomeSelector;
+                    WorkFiles[(int)sel].HomeOrBaseText = IsHomeSelector(WorkFiles[(int)sel].HomeOrBaseText) ? BaseSelector : HomeSelector;
                 }
                 LoadList(true);
             }
         }
 
-        private void compareToolStripMenuItem_Click(object sender, EventArgs e)
+        private bool IsFilesDifferent(string leftFile, string rightFile)
         {
-            if (listViewFiles.SelectedIndices.Count > 0)
-            {
-                foreach (var sel in listViewFiles.SelectedIndices)
-                {
-                    var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
-                    RunCompare(_workFiles[(int) sel].Path,
-                        _workFiles[(int) sel].Path.Replace(set.PathLocal,
-                            _workFiles[(int) sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase));
-                }
-            }
-        }
+            BMTools.BmDebug.Debug.InfoAsync("compare type=", Settings.CompareType);
 
-
-
-        private void RunCompare(string leftFile, string rightFile)
-        {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
-
-            BMTools.BmDebug.Debug.Info("compare type=", _settings.CompareType);
-
-            if (_settings.CompareType != CompareTypes.None)
+            if (Settings.CompareType != CompareTypes.None)
             {
                 try
                 {
-                    BMTools.BmDebug.Debug.Info("lf=", leftFile, "rf=", rightFile);
+                    BMTools.BmDebug.Debug.InfoAsync("lf=", leftFile, "rf=", rightFile);
                     var lf = new FileInfo(leftFile);
                     var rf = new FileInfo(rightFile);
-                    if (_settings.CompareType == CompareTypes.Size)
+                    if (Settings.CompareType == CompareTypes.Size)
                     {
-                        BMTools.BmDebug.Debug.Info("lf.Length=", lf.Length, "rf.Length=", rf.Length);
-                        if (lf.Length == rf.Length) return;
+                        BMTools.BmDebug.Debug.InfoAsync("lf.Length=", lf.Length, "rf.Length=", rf.Length);
+                        if (lf.Length != rf.Length) return true;
                     }
-                    else if (_settings.CompareType == CompareTypes.Date)
+                    else if (Settings.CompareType == CompareTypes.Date)
                     {
-                        BMTools.BmDebug.Debug.Info("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
+                        BMTools.BmDebug.Debug.InfoAsync("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
                         //BMTools.BmDebug.Info("lf=", lf.CreationTime, "rf=", rf.CreationTime);
                         //BMTools.BmDebug.Info("lf=", lf.LastAccessTime, "rf=", rf.LastAccessTime);
-                        if (lf.LastWriteTime.Date.Year == rf.LastWriteTime.Date.Year &&
-                            lf.LastWriteTime.Date.Day == rf.LastWriteTime.Date.Day &&
-                            lf.LastWriteTime.Date.Hour == rf.LastWriteTime.Date.Hour &&
-                            lf.LastWriteTime.Date.Minute == rf.LastWriteTime.Date.Minute &&
-                            lf.LastWriteTime.Date.Second == rf.LastWriteTime.Date.Second
-                            ) return;
+                        if (lf.LastWriteTime.Date.Year != rf.LastWriteTime.Date.Year ||
+                            lf.LastWriteTime.Date.Day != rf.LastWriteTime.Date.Day ||
+                            lf.LastWriteTime.Date.Hour != rf.LastWriteTime.Date.Hour ||
+                            lf.LastWriteTime.Date.Minute != rf.LastWriteTime.Date.Minute ||
+                            lf.LastWriteTime.Date.Second != rf.LastWriteTime.Date.Second
+                        ) return true;
                     }
-                    else if (_settings.CompareType == CompareTypes.Crc)
+                    else if (Settings.CompareType == CompareTypes.Crc)
                     {
                         var crcL = lf.CalculateCrc();
                         var crcR = rf.CalculateCrc();
 
-                        BMTools.BmDebug.Debug.Info("lf.crc=", crcL, "rf.crc=", crcR);
+                        BMTools.BmDebug.Debug.InfoAsync("lf.crc=", crcL, "rf.crc=", crcR);
 
-                        if (crcL == crcR) return;    
+                        if (crcL != crcR) return true;
                     }
                 }
                 catch (Exception e)
                 {
-                    BMTools.BmDebug.Debug.Crit("RunCompare ", e.Message);
+                    BMTools.BmDebug.Debug.CritAsyc("RunCompare ", e.Message);
                     MessageBox.Show(@"File open error=" + e.Message);
-                    return;
                 }
             }
-            if (string.IsNullOrEmpty(_settings.MergeAppPath))
-            {
-                MessageBox.Show(@"No have configured Merge Application");
-                return;
-            }
-            var startinfo = new ProcessStartInfo
-            {
-                FileName = _settings.MergeAppPath,
-                Arguments = leftFile + " " + rightFile,
-                UseShellExecute = true,
-                CreateNoWindow = true
-            };
-            Process.Start(startinfo);
+            return false;
         }
-        private void compareEtalonToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RunCompare(string leftFile, string rightFile)
+        {
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT) return;
+
+            if (IsFilesDifferent(leftFile, rightFile))
+            {
+                if (string.IsNullOrEmpty(Settings.MergeAppPath))
+                {
+                    MessageBox.Show(@"No have configured Merge Application");
+                    return;
+                }
+                var startinfo = new ProcessStartInfo
+                {
+                    FileName = Settings.MergeAppPath,
+                    Arguments = leftFile + " " + rightFile,
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                };
+                Process.Start(startinfo);
+            }
+        }
+
+        private void RunCompareFiles(bool etalon)
         {
             if (listViewFiles.SelectedIndices.Count > 0)
             {
-                foreach (var sel in listViewFiles.SelectedIndices)
+                foreach (int sel in listViewFiles.SelectedIndices)
                 {
-                    var set = GetSettingsPathesByName(_workFiles[(int) sel].VersionName);
-                    RunCompare(_workFiles[(int)sel].Path, _workFiles[(int)sel].Path.Replace(set.PathLocal, set.PathEtalon));
+                    var set = GetSettingsPathesByName(WorkFiles[sel].VersionName);
+                    RunCompare(WorkFiles[sel].Path,
+                        WorkFiles[sel].Path.Replace(set.PathLocal,
+                            etalon
+                                ? set.PathEtalon
+                                : (WorkFiles[sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase)));
                 }
             }
+        }
+        private void compareEtalonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RunCompareFiles(true);
         }
 
         private SettingsPathes GetSettingsPathesByName(string versionName)
         {
-            return _pathes.First(p => p.Name == versionName);
+            return Pathes.First(p => p.Name == versionName);
         }
 
         private string GetUnixPath(string path, string versionName, string homeOrBaseText)
@@ -554,7 +571,7 @@ namespace WorkCopy
                     .Aggregate(string.Empty,
                         (current, sel) =>
                             current +
-                            GetUnixPath(_workFiles[(int) sel].Path, _workFiles[(int) sel].VersionName, _workFiles[(int) sel].HomeOrBaseText))
+                            GetUnixPath(WorkFiles[(int) sel].Path, WorkFiles[(int) sel].VersionName, WorkFiles[(int) sel].HomeOrBaseText))
                             );
             }
         }
@@ -563,7 +580,7 @@ namespace WorkCopy
         {
             foreach (var sel in listViewFiles.SelectedIndices)
             {
-                CopyFile(GetRemotePath(_workFiles[(int)sel]), _workFiles[(int)sel].Path);
+                CopyFile(GetRemotePath(WorkFiles[(int)sel]), WorkFiles[(int)sel].Path);
             }
         }
 
@@ -597,7 +614,7 @@ namespace WorkCopy
         {
             foreach (var sel in listViewFiles.SelectedIndices)
             {
-                CopyFile(_workFiles[(int)sel].Path, GetRemotePath(_workFiles[(int)sel]));
+                CopyFile(WorkFiles[(int)sel].Path, GetRemotePath(WorkFiles[(int)sel]));
             }
         }
 
@@ -616,9 +633,67 @@ namespace WorkCopy
         {
             foreach (var sel in listViewFiles.SelectedIndices)
             {
-                var set = GetSettingsPathesByName(_workFiles[(int)sel].VersionName);
-                CopyFile(_workFiles[(int)sel].Path.Replace(set.PathLocal, set.PathEtalon), _workFiles[(int)sel].Path);
+                var set = GetSettingsPathesByName(WorkFiles[(int)sel].VersionName);
+                CopyFile(WorkFiles[(int)sel].Path.Replace(set.PathLocal, set.PathEtalon), WorkFiles[(int)sel].Path);
             }
+        }
+
+        private void compareLocalToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            RunCompareFiles(false);
+        }
+
+
+        private void SelectDifferents(bool etalon, bool different)
+        {
+            var indexes = new List<int>();
+            if (listViewFiles.SelectedIndices.Count > 0)
+            {
+                foreach (int sel in listViewFiles.SelectedIndices)
+                {
+                    var set = GetSettingsPathesByName(WorkFiles[sel].VersionName);
+                    if (IsFilesDifferent(WorkFiles[sel].Path,
+                        WorkFiles[sel].Path.Replace(set.PathLocal,
+                            etalon
+                                ? set.PathEtalon
+                                : (WorkFiles[sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase))) == different)
+                    {
+                        indexes.Add(sel);
+                    }
+                }
+            }
+            for (var i = 0; i < WorkFiles.Count; i++)
+            {
+                listViewFiles.Items[i].Focused = listViewFiles.Items[i].Selected = indexes.Contains(i);
+            }
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            for (var i = 0; i < WorkFiles.Count; i++)
+            {
+                listViewFiles.Items[i].Focused = listViewFiles.Items[i].Selected = true;
+            }
+        }
+
+        private void differentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectDifferents(true, true);
+        }
+
+        private void sameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SelectDifferents(true, false);
+        }
+
+        private void differentToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            SelectDifferents(false, true);
+        }
+
+        private void sameToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            SelectDifferents(false, false);
         }
     }
 }

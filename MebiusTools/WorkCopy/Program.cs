@@ -25,7 +25,7 @@ namespace WorkCopy
             }
             catch (Exception e)
             {
-                BMTools.BmDebug.Debug.Crit("Exception=", e.Message);
+                BMTools.BmDebug.Debug.CritAsyc("Exception=", e.Message);
                 throw;
             }
             

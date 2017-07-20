@@ -480,7 +480,8 @@ namespace WorkCopy
                     }
                     else if (Settings.CompareType == CompareTypes.Date)
                     {
-                        BMTools.BmDebug.Debug.InfoAsync("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=", rf.LastWriteTime);
+                        BMTools.BmDebug.Debug.InfoAsync("lf.LastWriteTime=", lf.LastWriteTime, "rf.LastWriteTime=",
+                            rf.LastWriteTime);
                         //BMTools.BmDebug.Info("lf=", lf.CreationTime, "rf=", rf.CreationTime);
                         //BMTools.BmDebug.Info("lf=", lf.LastAccessTime, "rf=", rf.LastAccessTime);
                         if (lf.LastWriteTime.Date.Year != rf.LastWriteTime.Date.Year ||
@@ -502,6 +503,7 @@ namespace WorkCopy
                 }
                 catch (Exception e)
                 {
+                    if (Settings.OnlyExistingFilesCompare) return true;
                     BMTools.BmDebug.Debug.CritAsyc("RunCompare ", e.Message);
                     MessageBox.Show(@"File open error=" + e.Message);
                 }

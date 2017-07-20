@@ -33,6 +33,8 @@ namespace WorkCopy
             textBoxMergeAppPath.Text = _settings.MergeAppPath;
 
             SetCompareTypeSelected();
+
+            checkBoxOnlyExistingFiles.Checked = _settings.OnlyExistingFilesCompare;
         }
 
         private void buttonAdd_Click(object sender, EventArgs e)
@@ -176,13 +178,15 @@ namespace WorkCopy
         {
             _settings.MergeAppPath = textBoxMergeAppPath.Text;
             _settings.CompareType = GetCompareTypeSelected();
+            _settings.OnlyExistingFilesCompare = checkBoxOnlyExistingFiles.Checked;
             _settings.Save();
         }
 
         private void CompareSettingsChanged(object sender, EventArgs e)
         {
             buttonUpdateMergeAppPath.Enabled = _settings.MergeAppPath != textBoxMergeAppPath.Text 
-                || _settings.CompareType != GetCompareTypeSelected();
+                || _settings.CompareType != GetCompareTypeSelected() 
+                || _settings.OnlyExistingFilesCompare != checkBoxOnlyExistingFiles.Checked;
         }
     }
 }

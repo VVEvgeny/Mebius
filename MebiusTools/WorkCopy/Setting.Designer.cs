@@ -47,6 +47,7 @@
             this.buttonRemove = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.checkBoxOnlyExistingFiles = new System.Windows.Forms.CheckBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.radioButtonCrc = new System.Windows.Forms.RadioButton();
             this.radioButtonDate = new System.Windows.Forms.RadioButton();
@@ -233,16 +234,28 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.checkBoxOnlyExistingFiles);
             this.groupBox2.Controls.Add(this.groupBox3);
             this.groupBox2.Controls.Add(this.label7);
             this.groupBox2.Controls.Add(this.textBoxMergeAppPath);
             this.groupBox2.Controls.Add(this.buttonUpdateMergeAppPath);
             this.groupBox2.Location = new System.Drawing.Point(0, 216);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(499, 90);
+            this.groupBox2.Size = new System.Drawing.Size(499, 109);
             this.groupBox2.TabIndex = 18;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Compare";
+            // 
+            // checkBoxOnlyExistingFiles
+            // 
+            this.checkBoxOnlyExistingFiles.AutoSize = true;
+            this.checkBoxOnlyExistingFiles.Location = new System.Drawing.Point(15, 90);
+            this.checkBoxOnlyExistingFiles.Name = "checkBoxOnlyExistingFiles";
+            this.checkBoxOnlyExistingFiles.Size = new System.Drawing.Size(106, 17);
+            this.checkBoxOnlyExistingFiles.TabIndex = 19;
+            this.checkBoxOnlyExistingFiles.Text = "Only existing files";
+            this.checkBoxOnlyExistingFiles.UseVisualStyleBackColor = true;
+            this.checkBoxOnlyExistingFiles.CheckedChanged += new System.EventHandler(this.CompareSettingsChanged);
             // 
             // groupBox3
             // 
@@ -324,7 +337,7 @@
             // 
             this.buttonUpdateMergeAppPath.Location = new System.Drawing.Point(414, 14);
             this.buttonUpdateMergeAppPath.Name = "buttonUpdateMergeAppPath";
-            this.buttonUpdateMergeAppPath.Size = new System.Drawing.Size(75, 69);
+            this.buttonUpdateMergeAppPath.Size = new System.Drawing.Size(75, 89);
             this.buttonUpdateMergeAppPath.TabIndex = 17;
             this.buttonUpdateMergeAppPath.Text = "Update";
             this.buttonUpdateMergeAppPath.UseVisualStyleBackColor = true;
@@ -334,7 +347,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(498, 314);
+            this.ClientSize = new System.Drawing.Size(498, 326);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.MaximizeBox = false;
@@ -382,5 +395,6 @@
         private System.Windows.Forms.RadioButton radioButtonDate;
         private System.Windows.Forms.RadioButton radioButtonSize;
         private System.Windows.Forms.RadioButton radioButtonAlways;
+        private System.Windows.Forms.CheckBox checkBoxOnlyExistingFiles;
     }
 }

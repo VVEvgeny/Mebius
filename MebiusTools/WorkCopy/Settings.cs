@@ -32,6 +32,14 @@ namespace WorkCopy
             get { return (CompareTypes)this["CompareType"]; }
             set { this["CompareType"] = value; }
         }
+        [UserScopedSetting]
+        [SettingsSerializeAs(SettingsSerializeAs.Binary)]
+        [DefaultSettingValue("")]
+        public bool OnlyExistingFilesCompare
+        {
+            get { return (bool)this["OnlyExistingFilesCompare"]; }
+            set { this["OnlyExistingFilesCompare"] = value; }
+        }
 
         public enum CompareTypes
         {

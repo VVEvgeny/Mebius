@@ -59,7 +59,34 @@ namespace BMTools
             Critical
         }
 
-        public OutputModes Output { get; set; }
+        //private LogWindow _logWind = new LogWindow();
+        private LogWindow _logWind;
+        private LogWindow LogWindow
+        {
+            get
+            {
+                lock (_monitorLogWindow)
+                {
+                    if (_logWind == null || _logWind.IsDisposed) _logWind = new LogWindow();
+                }
+                return _logWind;
+            }
+        }
+        public OutputModes Output
+        {
+            get => _output;
+            set
+            {
+                _output = value;
+                lock (_monitorLogWindow)
+                {
+                    
+                    if (value == OutputModes.File) LogWindow.Hide();
+                    else LogWindow.Show();
+                }
+            }
+        }
+
         public bool DisableTimeStamp = false;
 
         public enum DebugLevels
@@ -89,9 +116,10 @@ namespace BMTools
         }
         public Encoding Encoding = Encoding.GetEncoding("cp866");
 
-        private readonly LogWindow _logWind = new LogWindow();
         private readonly object _monitor = new object();
+        private readonly object _monitorLogWindow = new object();
         private readonly string[] _modeTxt = {" (I) ", " (W) ", " (C) "};
+        private OutputModes _output;
 
 
         private class CallerInfo
@@ -233,7 +261,11 @@ namespace BMTools
                 }
                 else
                 {
-                    _logWind.WriteLine(DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff") + _modeTxt[(int)m] + ":" + val);
+                    lock (_monitorLogWindow)
+                    {
+                        LogWindow.WriteLine(DateTime.Now.ToString("dd.MM.yy hh:mm:ss.fff") + _modeTxt[(int) m] + ":" +
+                                            val);
+                    }
                 }
             }
         }
@@ -326,7 +358,10 @@ namespace BMTools
                 }
                 else
                 {
-                    _logWind.WriteLine(str);
+                    lock (_monitorLogWindow)
+                    {
+                        LogWindow.WriteLine(str);
+                    }
                 }
             }
         }

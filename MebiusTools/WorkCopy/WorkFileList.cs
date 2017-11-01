@@ -16,7 +16,7 @@ namespace WorkCopy
             public new void Add(WorkFile workFile)
             {
                 base.Add(workFile);
-                BMTools.BmDebug.Debug.InfoAsync("+++");
+                //BMTools.BmDebug.Debug.InfoAsync("+++");
                 UpdateListViewCounts?.Invoke(this, new UpdateListViewEventArgs { Count = Count });
             }
 

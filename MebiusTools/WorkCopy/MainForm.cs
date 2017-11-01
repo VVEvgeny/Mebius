@@ -416,6 +416,13 @@ namespace WorkCopy
                 case Keys.Multiply:
                     changeHBToolStripMenuItem_Click(sender, new EventArgs());
                     return;
+                    //on/off debug window
+                case Keys.Divide:
+                    BMTools.BmDebug.Debug.Output =
+                    (BMTools.BmDebug.Debug.Output == BMTools.BmDebug.OutputModes.LogWindow
+                        ? BMTools.BmDebug.OutputModes.File
+                        : BMTools.BmDebug.OutputModes.LogWindow);
+                    return;
             }
             ProcessFiltr(e);
         }
@@ -462,7 +469,7 @@ namespace WorkCopy
             }
         }
 
-        private bool IsFilesDifferent(string leftFile, string rightFile)
+        private bool IsFilesDifferent(string leftFile, string rightFile, bool onlySelect = false)
         {
             BMTools.BmDebug.Debug.InfoAsync("compare type=", Settings.CompareType);
 
@@ -503,7 +510,8 @@ namespace WorkCopy
                 }
                 catch (Exception e)
                 {
-                    if (Settings.OnlyExistingFilesCompare) return true;
+                    if (!Settings.OnlyExistingFilesCompare) return true;
+                    if (onlySelect) return true;
                     BMTools.BmDebug.Debug.CritAsyc("RunCompare ", e.Message);
                     MessageBox.Show(@"File open error=" + e.Message);
                 }
@@ -554,6 +562,7 @@ namespace WorkCopy
 
         private SettingsPathes GetSettingsPathesByName(string versionName)
         {
+            //BMTools.BmDebug.Debug.InfoAsync("versionName=" + versionName);
             return Pathes.First(p => p.Name == versionName);
         }
 
@@ -655,10 +664,11 @@ namespace WorkCopy
                 {
                     var set = GetSettingsPathesByName(WorkFiles[sel].VersionName);
                     if (IsFilesDifferent(WorkFiles[sel].Path,
-                        WorkFiles[sel].Path.Replace(set.PathLocal,
-                            etalon
-                                ? set.PathEtalon
-                                : (WorkFiles[sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase))) == different)
+                            WorkFiles[sel].Path.Replace(set.PathLocal,
+                                etalon
+                                    ? set.PathEtalon
+                                    : (WorkFiles[sel].HomeOrBaseText == "H" ? set.PathRemoteHome : set.PathRemoteBase)),
+                            true) == different)
                     {
                         indexes.Add(sel);
                     }

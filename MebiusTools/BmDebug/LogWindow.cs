@@ -36,5 +36,16 @@ namespace BmDebug
 
             _richTextBoxText.BeginInvoke((MethodInvoker) (() => _richTextBoxText.Text += text + Environment.NewLine));
         }
+        
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // LogWindow
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Name = "LogWindow";
+            this.ResumeLayout(false);
+        }
     }
 }

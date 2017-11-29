@@ -4,7 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Tasks.Database
+namespace OracleBases.Database
 {
     public interface IGenericRepository<T>
     {

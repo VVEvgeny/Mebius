@@ -54,7 +54,7 @@
     <Compile Include="EfUnitOfWork.cs" />
     <Compile Include="IGenericRepository.cs" />
     <Compile Include="IUnitOfWork.cs" />
-    <Compile Include="Models\ConnectInfo.cs" />
+    <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Connect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

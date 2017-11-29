@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Tasks.Database
+namespace OracleBases.Database
 {
     public class EfGenericRepository<T> : IGenericRepository<T> where T : class
     {

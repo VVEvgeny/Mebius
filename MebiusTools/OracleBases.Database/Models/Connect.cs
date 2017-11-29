@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Tasks.Database.Models
+namespace OracleBases.Database.Models
 {
     public class Connect
     {
@@ -26,5 +25,16 @@ namespace Tasks.Database.Models
 
         [Required]
         public string ServiceName { get; set; }
+
+        [Required]
+        public DateTime DateAdd { get; set; }
+
+        public DateTime LastUsed { get; set; }
+
+        public string OperDay { get; set; }
+
+        public string PrevDay { get; set; }
+
+        public string Regions { get; set; }
     }
 }

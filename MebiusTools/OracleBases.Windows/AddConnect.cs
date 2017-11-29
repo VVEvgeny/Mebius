@@ -42,7 +42,23 @@ namespace OracleBases.Windows
         public string GetName => textBoxName.Text;
         public string GetHost => textBoxHost.Text;
         public new string GetService => textBoxService.Text;
-        public string GetPort => textBoxPort.Text;
+
+        public int GetPort
+        {
+            get
+            {
+                var port = 0;
+                try
+                {
+                    port = int.Parse(textBoxPort.Text);
+                }
+                catch
+                {
+                    port = 0;
+                }
+                return port;
+            }
+        }
         public string GetUserId => textBoxUserId.Text;
         public string GetPassword => textBoxPassword.Text;
 

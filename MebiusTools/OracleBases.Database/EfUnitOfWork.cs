@@ -3,10 +3,10 @@ using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Threading.Tasks;
-using Tasks.Database.Models;
-using static BMTools.BmDebug;
+using OracleBases.Database.Migrations;
+using OracleBases.Database.Models;
 
-namespace Tasks.Database
+namespace OracleBases.Database
 {
     public class EfUnitOfWork : DbContext, IUnitOfWork
     {
@@ -14,15 +14,13 @@ namespace Tasks.Database
 
         #region Private Repos (add one per entity)
 
-        private EfGenericRepository<Connect> _ConnectRepo;
-        private EfGenericRepository<ConnectInfo> _ConnectInfoRepo;
+        private EfGenericRepository<Connect> _connectRepo;
 
         #endregion
 
         #region Public DbSets (add one per entity)
 
         public DbSet<Connect> Connects { get; set; }
-        public DbSet<ConnectInfo> ConnectInfos { get; set; }
 
         #endregion
 
@@ -31,13 +29,13 @@ namespace Tasks.Database
         public EfUnitOfWork() : base("DBConnection")
         {
             Database = base.Database;
-
+            System.Data.Entity.Database.SetInitializer(new MigrateDatabaseToLatestVersion<EfUnitOfWork, Configuration>("DBConnection"));
             //Database.Log = s => Debug.InfoAsync(s); //System.Diagnostics.Debug.WriteLine(s);
         }
         public EfUnitOfWork(DbConnection connection) : base(connection, true)
         {
             Database = base.Database;
-
+            System.Data.Entity.Database.SetInitializer(new MigrateDatabaseToLatestVersion<EfUnitOfWork, Configuration>(connection.Database));
             //Database.Log = s => Debug.InfoAsync(s); //System.Diagnostics.Debug.WriteLine(s);
         }
 
@@ -45,8 +43,7 @@ namespace Tasks.Database
 
         #region IUnitOfWork Implementation (add one per entity)
 
-        public IGenericRepository<Connect> ConnectRepository => _ConnectRepo ?? (_ConnectRepo = new EfGenericRepository<Connect>(Connects));
-        public IGenericRepository<ConnectInfo> ConnectInfoRepository => _ConnectInfoRepo ?? (_ConnectInfoRepo = new EfGenericRepository<ConnectInfo>(ConnectInfos));
+        public IGenericRepository<Connect> ConnectRepository => _connectRepo ?? (_connectRepo = new EfGenericRepository<Connect>(Connects));
 
         #endregion
 

@@ -3,14 +3,19 @@ using System.Text;
 using System.Xml.Schema;
 
 int logTo = 2; //1-console, 2-file
-var dir = new DirectoryInfo(@"c:\_Code\meb_sql_docs");
+
+bool onlyIfAccOpenedAndWithRest = true;
+string procPrepend = "    ";
+
+//если нам надо включать их в 490817
+//надо заполнить xMMOTypeAcc = 0 а не пусто
 
 StreamWriter sw = null;
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Encoding enc = Encoding.GetEncoding(866); 
 if(logTo == 2)
 {
-    sw = new StreamWriter(Path.Combine(dir.FullName,"docs.sql"), false, enc);
+    sw = new StreamWriter(Path.Combine(Directory.GetCurrentDirectory(),"docs.sql"), false, enc);
 }
 
 
@@ -48,6 +53,7 @@ var fieldsWithPossibleDefaultZaro = new HashSet<string>()
     "XNUMMEMORDER",
     "XAMTPAY",
     "XREESTRCOL",
+    "XDOCIDEXT",
     //dturn
     "XPACK",
     "NUM_USER",
@@ -75,7 +81,7 @@ var defaults = new Dictionary<string,string>()
     {"XTYPEPAY","2"},
     {"XTIME","SYSDATE"},
     {"XSPECDOC","2"},
-    {"XDOCIDEXT","NVL ((SELECT MAX (id) FROM xpress.uniqidtb WHERE bnk3 <> 0 AND id <= 999999),0) + 1"},
+    //{"XDOCIDEXT","NVL ((SELECT MAX (id) FROM xpress.uniqidtb WHERE bnk3 <> 0 AND id <= 999999),0) + 1"},
     {"XTIMEPAY","SYSDATE"},
     {"XDOCUID","(SELECT CONCAT (CONCAT ('4583001999',TO_CHAR (xdate,'YYYYMMDD')),TO_CHAR (LPAD ( NVL ((SELECT MAX (id) FROM xpress.uniqidtb WHERE bnk3 <> 0 AND id <= 999999),0) + 1, 9,'0'))) FROM xpress.daystat)"},
     {"XSYSTEMCODE","'05'"},
@@ -164,8 +170,7 @@ var req = new List<Dictionary<string,string>>();
 
 var accs = new string[]
 {
-"60322 810 1 4537 0002507",
-"60322 810 1 4537 0002468",
+  //"10601 810 6 0000 0000001"//test account test db
 "60322 810 8 4537 0002454",
 "60322 810 0 4537 0002429",
 "60322 810 2 4537 0002410",
@@ -213,8 +218,6 @@ var accs = new string[]
 "60322 810 6 4537 0004623",
 "60322 810 2 4537 0003794",
 "60322 810 8 4537 0002946",
-"60322 972 4 4537 0000011",
-"60322 972 1 4537 0000010",
 "60322 810 3 4537 0002721"
 };
 
@@ -234,7 +237,7 @@ foreach(var r in req)
     {
         r.ReplaceOrAdd("XAMT", 
         "(select xmtsck from xpress.account "
-        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDAT")} and acc_bal = {getValueByField(r,"XAT_BAL")} and acc_cur = {getValueByField(r,"XAT_CUR")} and acc_key = {getValueByField(r,"XAT_KEY")} and acc_brn = {getValueByField(r,"XAT_BRN")} and acc_per = {getValueByField(r,"XAT_PER")} "
+        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDAT")} and acc_bal = {getValueByField(r,"XAT_BAL")} and acc_cur = {getValueByField(r,"XAT_CUR")} and acc_key = {getValueByField(r,"XAT_KEY")} and acc_brn = {getValueByField(r,"XAT_BRN")} and acc_per = {getValueByField(r,"XAT_PER")} and xclose = 0 "
         +")");
     }
 
@@ -249,7 +252,23 @@ foreach(var r in req)
     var q = generateuniqidtb();
     var ac = updateAccounts(r);
 
-    docs.Add(new List<string>{dm, dt, dn, q, ac});
+    if(onlyIfAccOpenedAndWithRest)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine(dm);
+        sb.AppendLine(dt);
+        sb.AppendLine(dn);
+        sb.AppendLine(q);
+        sb.AppendLine(ac);
+
+        var full = genearateProc(r);
+        full = full.Replace("%BODY%",sb.ToString());
+        docs.Add(new List<string>{full});
+
+
+    }
+    else 
+        docs.Add(new List<string>{dm, dt, dn, q, ac});
 }
 
 int i = 1;
@@ -357,9 +376,26 @@ string addFieldsIfExist(Dictionary<string,string> r, params string[] fields)
     return sb.ToString();
 }
 
+string genearateProc(Dictionary<string,string> r)
+{
+    return 
+    "DECLARE"+Environment.NewLine+
+    "  acc_id xpress.account.acc_id%TYPE;"+Environment.NewLine+
+    "BEGIN"+Environment.NewLine+
+    $"  SELECT (select (case when acc_id is null then 0 else acc_id end) from xpress.account WHERE bnk_id = {getValueByField(r,"BNK_IDAT")} and acc_bal = {getValueByField(r,"XAT_BAL")} and acc_cur = {getValueByField(r,"XAT_CUR")} and acc_key = {getValueByField(r,"XAT_KEY")} and acc_brn = {getValueByField(r,"XAT_BRN")} and acc_per = {getValueByField(r,"XAT_PER")} and xmtsck > 0 and xclose = 0) INTO acc_id"+Environment.NewLine+
+    "  FROM dual;"+Environment.NewLine+
+    "  IF acc_id > 0 then"+Environment.NewLine+
+    "%BODY%"+Environment.NewLine+
+    "  END IF;"+Environment.NewLine+
+    "END;"+Environment.NewLine+
+    "/"+Environment.NewLine
+    ;     
+}
+
 string generateDmain(Dictionary<string,string> r)
 {
-    return $"Insert into xpress.DMAIN "
+    return (onlyIfAccOpenedAndWithRest?procPrepend:"")
+    +$"Insert into xpress.DMAIN "
     +getFieldsValues(r, "XDATE,XDOCID,XDOCN,XDATEB,XMFOA,XKORA_BAL,XKORA_CUR,XKORA_KEY,XKORA_BRN,XKORA_PER,XACCA_BAL,XACCA_CUR,XACCA_KEY,XACCA_BRN,XACCA_PER,XMFOB,XKORB_BAL,XKORB_CUR,XKORB_KEY,XKORB_BRN,XKORB_PER,XACCB_BAL,XACCB_CUR,XACCB_KEY,XACCB_BRN,XACCB_PER,XAMT,XDK,XOPR,XSYM,XPAYCODE,XACCKOR,XFINISH,XYEAR,XPRIOR,XWAY,XTYPEPAY,XTIME,XSPECDOC,XIS9920,XSECUENCE,XDOCIDEXT,XERRORCODE,XRKCKO,XSALDORESULT,XUSERIDEXT,XBIRTH,XPACKEXT,XTIMEPAY,XDOCUID,XRESERVE,XDOCPLACE,XNUMMEMORDER,XSYSTEMCODE,EDDATE,EDAUTHOR,EDNO,XAMTPAY,XREESTRCOL,XOPR_EXT,XDISTANCE,XPAYMENTPRIORITY");
 }
 
@@ -387,42 +423,35 @@ string generateDturns(Dictionary<string,string> r)
         r2.ReplaceOrAdd("XDIR","1");
         r1.ReplaceOrAdd("BNK_ID",r1["BNK_IDBT"]);
 
-        var t1 =
+        var t1 = (onlyIfAccOpenedAndWithRest?procPrepend:"")+
         $"Insert into xpress.DTURN "
         +getFieldsValues(r1, "XDATE, XDOCID, BNK_ID, XPACK, BNK_IDAT, XAT_BAL, XAT_CUR, XAT_KEY, XAT_BRN, XAT_PER, BNK_IDBT, XBT_BAL, XBT_CUR, XBT_KEY, XBT_BRN, XBT_PER, NUM_USER, XDIR, XSTAT, XSTATDOC, XACCESS, XPRG, XTURNTO902, XPACKUID, XNR, XTIMETURN,XNR_IN, BNK_ID_BALANCE, BNK_ID_UBR_AUTHOR, XNUMPRG, XNRCONS,  SBALANCE");
 
-        var t2 =
+        var t2 =(onlyIfAccOpenedAndWithRest?procPrepend:"")+
         $"Insert into xpress.DTURN "
         +getFieldsValues(r2, "XDATE, XDOCID, BNK_ID, XPACK, BNK_IDAT, XAT_BAL, XAT_CUR, XAT_KEY, XAT_BRN, XAT_PER, BNK_IDBT, XBT_BAL, XBT_CUR, XBT_KEY, XBT_BRN, XBT_PER, NUM_USER, XDIR, XSTAT, XSTATDOC, XACCESS, XPRG, XTURNTO902, XPACKUID, XNR, XTIMETURN,XNR_IN, BNK_ID_BALANCE, BNK_ID_UBR_AUTHOR, XNUMPRG, XNRCONS,  SBALANCE");
 
 
         return t1+Environment.NewLine+t2;
-//Insert into xpress.DTURN (XDATE, XDOCID,  
-//BNK_ID, XPACK, BNK_IDAT, XAT_BAL, XAT_CUR, XAT_KEY, XAT_BRN, XAT_PER,  BNK_IDBT, XBT_BAL, XBT_CUR, XBT_KEY, XBT_BRN, XBT_PER, NUM_USER, XDIR, XSTAT, XSTATDOC, XACCESS, XPRG, XTURNTO902, XPACKUID, XNR, XTIMETURN,XNR_IN, BNK_ID_BALANCE, BNK_ID_UBR_AUTHOR, XNUMPRG, XNRCONS,  SBALANCE) 
-//Values ((select xdate from xpress.daystat), (select MAX(xdocid) from xpress.dmain where xdate = (select xdate from xpress.daystat)), 
-//44537002, 0, 44537002, 70101, '810', 0, 4537, 118003, 0, 0, '000', 0, 0, 0, 0, 0, 0, 1, 1, 77, 0, '', 5, sysdate, 5, 44537002, 999999999, 0, 3, 44537002);
-
-//Insert into xpress.DTURN (XDATE, XDOCID,  
-//BNK_ID, XPACK, BNK_IDAT, XAT_BAL, XAT_CUR, XAT_KEY, XAT_BRN, XAT_PER,  BNK_IDBT, XBT_BAL, XBT_CUR, XBT_KEY, XBT_BRN, XBT_PER, NUM_USER, XDIR, XSTAT, XSTATDOC, XACCESS, XPRG, XTURNTO902, XPACKUID, XNR, XTIMETURN,XNR_IN, BNK_ID_BALANCE, BNK_ID_UBR_AUTHOR, XNUMPRG, XNRCONS,  SBALANCE) 
-//Values ((select xdate from xpress.daystat), (select MAX(xdocid) from xpress.dmain where xdate = (select xdate from xpress.daystat)), 
-//44501002, 0, 0, 0, '000', 0, 0, 0, 44501002, 47427, '810', 9, 4501, 4019234, 0, 0, 0, 1, 1, 77, 0, '', 5, sysdate, 5, 44537002, 0, 0, 3, 44537002);
-
     }
     else 
-        return $"Insert into xpress.DTURN "
+        return (onlyIfAccOpenedAndWithRest?procPrepend:"")+
+        $"Insert into xpress.DTURN "
         +getFieldsValues(r, "XDATE, XDOCID, BNK_ID, XPACK, BNK_IDAT, XAT_BAL, XAT_CUR, XAT_KEY, XAT_BRN, XAT_PER, BNK_IDBT, XBT_BAL, XBT_CUR, XBT_KEY, XBT_BRN, XBT_PER, NUM_USER, XDIR, XSTAT, XSTATDOC, XACCESS, XPRG, XTURNTO902, XPACKUID, XNR, XTIMETURN,XNR_IN, BNK_ID_BALANCE, BNK_ID_UBR_AUTHOR, XNUMPRG, XNRCONS,  SBALANCE");
 }
 
 string generateDname(Dictionary<string,string> r)
 {
-    return $"Insert into xpress.DNAME "
+    return (onlyIfAccOpenedAndWithRest?procPrepend:"")+
+    $"Insert into xpress.DNAME "
     + getFieldsValues(r, "XDATE,XDOCID" + addFieldsIfExist(r,"xnameplat1","xnameplat2","xnameplat3","xnameplat4","xnameplat5","xnameplat6","xnameplat7","xnameplat8")
     );
 }
 
 string generateuniqidtb()
 {
-    return "insert into xpress.uniqidtb (bnk7,bnk3,id) Values (0,1,( NVL ((SELECT MAX (id) FROM xpress.uniqidtb WHERE bnk3 <> 0 AND id <= 999999), 0) + 1));";
+    return (onlyIfAccOpenedAndWithRest?procPrepend:"")+
+    "insert into xpress.uniqidtb (bnk7,bnk3,id) Values (0,1,( NVL ((SELECT MAX (id) FROM xpress.uniqidtb WHERE bnk3 <> 0 AND id <= 999999), 0) + 1));";
 }
 
 string updateAccounts(Dictionary<string,string> r)
@@ -431,22 +460,22 @@ string updateAccounts(Dictionary<string,string> r)
     if(r.ContainsKey("acc_id_d") && r.ContainsKey("acc_id_k"))
     {    
         sb.AppendLine("-- deb");
-        sb.AppendLine($"UPDATE xpress.account SET rest = rest - {getValueByField(r,"XAMT")} , xMTsck = xMTsck - {getValueByField(r,"XAMT")} , xMDebet = xMDebet + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntDebet = xLCntDebet + 1, xLCntDebetVPS = xLCntDebetVPS + 1 WHERE acc_id = {getValueByField(r,"acc_id_d")} ;");
+        sb.AppendLine((onlyIfAccOpenedAndWithRest?procPrepend:"")+$"UPDATE xpress.account SET rest = rest - {getValueByField(r,"XAMT")} , xMTsck = xMTsck - {getValueByField(r,"XAMT")} , xMDebet = xMDebet + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntDebet = xLCntDebet + 1, xLCntDebetVPS = xLCntDebetVPS + 1 WHERE acc_id = {getValueByField(r,"acc_id_d")} ;");
 
         sb.AppendLine("-- cre");
-        sb.AppendLine($"UPDATE xpress.account SET rest = rest + {getValueByField(r,"XAMT")} , xMTsck = xMTsck + {getValueByField(r,"XAMT")} , xMCredit = xMCredit + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntCredit = xLCntCredit + 1, xLCntCreditVPS = xLCntCreditVPS + 1 WHERE acc_id = {getValueByField(r,"acc_id_k")} ;");
+        sb.AppendLine((onlyIfAccOpenedAndWithRest?procPrepend:"")+$"UPDATE xpress.account SET rest = rest + {getValueByField(r,"XAMT")} , xMTsck = xMTsck + {getValueByField(r,"XAMT")} , xMCredit = xMCredit + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntCredit = xLCntCredit + 1, xLCntCreditVPS = xLCntCreditVPS + 1 WHERE acc_id = {getValueByField(r,"acc_id_k")} ;");
     }
     else
     {
         //this need to be credit first if we get xamt from account
         sb.AppendLine("-- cre");
-        sb.AppendLine($"UPDATE xpress.account SET rest = rest + {getValueByField(r,"XAMT")} , xMTsck = xMTsck + {getValueByField(r,"XAMT")} , xMCredit = xMCredit + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntCredit = xLCntCredit + 1, xLCntCreditVPS = xLCntCreditVPS + 1 "
-        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDBT")} and acc_bal = {getValueByField(r,"XBT_BAL")} and acc_cur = {getValueByField(r,"XBT_CUR")} and acc_key = {getValueByField(r,"XBT_KEY")} and acc_brn = {getValueByField(r,"XBT_BRN")} and acc_per = {getValueByField(r,"XBT_PER")} ;"
+        sb.AppendLine((onlyIfAccOpenedAndWithRest?procPrepend:"")+$"UPDATE xpress.account SET rest = rest + {getValueByField(r,"XAMT")} , xMTsck = xMTsck + {getValueByField(r,"XAMT")} , xMCredit = xMCredit + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntCredit = xLCntCredit + 1, xLCntCreditVPS = xLCntCreditVPS + 1 "
+        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDBT")} and acc_bal = {getValueByField(r,"XBT_BAL")} and acc_cur = {getValueByField(r,"XBT_CUR")} and acc_key = {getValueByField(r,"XBT_KEY")} and acc_brn = {getValueByField(r,"XBT_BRN")} and acc_per = {getValueByField(r,"XBT_PER")} and xclose = 0 ;"
         );
 
         sb.AppendLine("-- deb");
-        sb.AppendLine($"UPDATE xpress.account SET rest = rest - {getValueByField(r,"XAMT")} , xMTsck = xMTsck - {getValueByField(r,"XAMT")} , xMDebet = xMDebet + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntDebet = xLCntDebet + 1, xLCntDebetVPS = xLCntDebetVPS + 1 "
-        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDAT")} and acc_bal = {getValueByField(r,"XAT_BAL")} and acc_cur = {getValueByField(r,"XAT_CUR")} and acc_key = {getValueByField(r,"XAT_KEY")} and acc_brn = {getValueByField(r,"XAT_BRN")} and acc_per = {getValueByField(r,"XAT_PER")} ;"
+        sb.AppendLine((onlyIfAccOpenedAndWithRest?procPrepend:"")+$"UPDATE xpress.account SET rest = rest - {getValueByField(r,"XAMT")} , xMTsck = xMTsck - {getValueByField(r,"XAMT")} , xMDebet = xMDebet + {getValueByField(r,"XAMT")} , doc_ecnt = doc_ecnt + 1, da_opr = ( SELECT xdate FROM xpress.daystat ), xLCntDebet = xLCntDebet + 1, xLCntDebetVPS = xLCntDebetVPS + 1 "
+        +$"WHERE bnk_id = {getValueByField(r,"BNK_IDAT")} and acc_bal = {getValueByField(r,"XAT_BAL")} and acc_cur = {getValueByField(r,"XAT_CUR")} and acc_key = {getValueByField(r,"XAT_KEY")} and acc_brn = {getValueByField(r,"XAT_BRN")} and acc_per = {getValueByField(r,"XAT_PER")} and xclose = 0 ;"
         );
     }
     return sb.ToString();

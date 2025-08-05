@@ -9,7 +9,7 @@ bool showByFile = true;
 int logTo = 2; //1-console, 2-file
 
 
-var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_x");
+var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_15072025\");
 
 StreamWriter sw = null;
 if(logTo == 2)

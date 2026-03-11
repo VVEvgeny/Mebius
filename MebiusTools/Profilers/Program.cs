@@ -12,7 +12,7 @@ bool showByFile = true;
 int logTo = 1; //1-console, 2-file
 bool sqlControls = true;
 
-var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_efimov_06_03_2026\");
+var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_11_03_2026_prev_prof2\");
 
 StreamWriter sw = null;
 if(logTo == 2)
@@ -48,7 +48,9 @@ long totalInsertCount = 0;
 long totalUpdateCount = 0;
 long totalDeleteCount = 0;
 long totalOtherCount = 0;
-
+TimeSpan totalSelectTime = TimeSpan.Zero;
+TimeSpan totalInsertTime = TimeSpan.Zero;
+TimeSpan totalUpdateTime = TimeSpan.Zero;
 
 var perFileStats = new List<FileStats>();
 
@@ -81,8 +83,11 @@ foreach(var f in dir.GetFiles())
         string transTime = "";
 
         string selectCount = "";
+        string selectTime = "";
         string insertCount = "";
+        string insertTime = "";
         string updateCount = "";
+        string updateTime = "";
         string deleteCount = "";
         string otherCount = "";
 
@@ -108,8 +113,15 @@ foreach(var f in dir.GetFiles())
 
             parseIf(l, "[-] |","Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 2, ref selectCount);
             parseIf(l, "[-] |","Библиотека QUEST: Выбор из БД (выполнение SELECT)", 2, ref selectCount);//old profiler format
+            parseIf(l, "[-] |","Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 4, ref selectTime);
+            parseIf(l, "[-] |","Библиотека QUEST: Выбор из БД (выполнение SELECT)", 4, ref selectTime);//old profiler format
+
             parseIf(l, "[-] |","Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 2, ref insertCount);
+            parseIf(l, "[-] |","Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 4, ref insertTime);
+
             parseIf(l, "[-] |","Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 2, ref updateCount);
+            parseIf(l, "[-] |","Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 4, ref updateTime);
+
             parseIf(l, "[-] |","Библиотека QUEST: Удаление из БД (выполнение DELETE)", 2, ref deleteCount);
 
             parseIf(l, "[-] |","Библиотека QUEST: Другие операции", 2, ref otherCount);
@@ -177,12 +189,15 @@ foreach(var f in dir.GetFiles())
             long.Parse(packs),
             long.Parse(dmains),
             parseTime(fullTime),
-            parseTime(dbTime),
+            //parseTime(dbTime),
             string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
             parseTime(accTime),
             string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
+            parseTime(selectTime),
             string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount),
+            parseTime(insertTime),
             string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
+            parseTime(updateTime),
             string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
             string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
         ));
@@ -218,6 +233,11 @@ foreach(var f in dir.GetFiles())
         totalUpdateCount += string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount);
         totalDeleteCount += string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount);
         totalOtherCount += string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount);
+
+        totalSelectTime += parseTime(selectTime);
+        totalInsertTime += parseTime(insertTime);
+        totalUpdateTime += parseTime(updateTime);
+
 /*
         double cntPerSecPacket = long.Parse(dmains) / ((parseTime(end) - parseTime(start)).TotalSeconds);
         Console.WriteLine("start:"+start+" end:"+end+" cntPerSecPacket:"+cntPerSecPacket);
@@ -345,7 +365,23 @@ TimeSpan parseTime(string input)
 
 string formatTime(TimeSpan t)
 {
-    return t.ToString(@"hh\:mm\:ss\.fff");
+    //return t.ToString(@"hh\:mm\:ss\.fff");
+    return t.ToString(@"hh\:mm\:ss");
+}
+
+string formatTimeShort(TimeSpan t)
+{
+    return t.ToString(@"mm\:ss");
+}
+
+string formatTimeWithPercent(TimeSpan t, TimeSpan total)
+{
+    if (total.Ticks == 0)
+        return formatTimeShort(t);
+
+    var p = percent(total, t);
+    var padded = p.ToString().PadLeft(2, ' ');
+    return $"{formatTimeShort(t)} ({padded}%)";
 }
 
 void PrintPerFileTable()
@@ -353,42 +389,50 @@ void PrintPerFileTable()
     if (!showByFile || perFileStats.Count == 0)
         return;
 
-    const string headerFmt = "{0,-30} {1,6} {2,10} {3,15} {4,15} {5,5} {6,8} {7,10} {8,10} {9,10} {10,6} {11,6}";
-    const string rowFmt = "{0,-30} {1,6} {2,10} {3,15} {4,15} {5,5} {6,8} {7,10} {8,10} {9,10} {10,6} {11,6}";
+    const string headerFmt = "{0,-38} {1,7} {2,7} {3,10} {4,6} {5,12} {6,7} {7,12} {8,7} {9,12} {10,7} {11,12} {12,7} {13,7}";
+    const string rowFmt = "{0,-38} {1,7} {2,7} {3,10} {4,6} {5,12} {6,7} {7,12} {8,7} {9,12} {10,7} {11,12} {12,7} {13,7}";
 
     Console.WriteLine();
     Console.WriteLine("Per-file summary:");
-    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "DBTime", "DB%", "AccCnt", "SELECT", "INSERT", "UPDATE", "DELETE", "OTHER");
-    Console.WriteLine(new string('-', 150));
+    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "Accs", "AccTime", "SELECT", "S time", "INSERT", "I time", "UPDATE", "U time", "DELETE", "OTHER");
+    Console.WriteLine(new string('-', 220));
 
     foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
     {
-        var dbPercent = percent(s.FullTime, s.DBTime);
+        //var dbPercent = percent(s.FullTime, s.DBTime);
         Console.WriteLine(rowFmt,
             s.FileName,
             s.Packs,
             s.Dmains,
             formatTime(s.FullTime),
-            formatTime(s.DBTime),
-            dbPercent,
+            //formatTime(s.DBTime),
+            //dbPercent,
             s.AccCnt,
+            formatTimeWithPercent(s.AccTime, s.FullTime),
             s.SelectCount,
+            formatTimeWithPercent(s.SelectTime - s.AccTime, s.FullTime), //subtract account lock time from select time for better visibility
             s.InsertCount,
+            formatTimeWithPercent(s.InsertTime, s.FullTime),
             s.UpdateCount,
+            formatTimeWithPercent(s.UpdateTime, s.FullTime),
             s.DeleteCount,
             s.OtherCount);
     }
 
     // Summary row
-    Console.WriteLine(new string('-', 150));
+    Console.WriteLine(new string('-', 220));
     var totalPacks = perFileStats.Sum(s => s.Packs);
     var totalDmains = perFileStats.Sum(s => s.Dmains);
     var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
-    var totalDBTime = new TimeSpan(perFileStats.Sum(s => s.DBTime.Ticks));
+    //var totalDBTime = new TimeSpan(perFileStats.Sum(s => s.DBTime.Ticks));
     var totalAccCnt = perFileStats.Sum(s => s.AccCnt);
+    var totalAccTime = new TimeSpan(perFileStats.Sum(s => s.AccTime.Ticks));
     var totalSelectCount = perFileStats.Sum(s => s.SelectCount);
+    var totalSelectTime = new TimeSpan(perFileStats.Sum(s => s.SelectTime.Ticks));
     var totalInsertCount = perFileStats.Sum(s => s.InsertCount);
+    var totalInsertTime = new TimeSpan(perFileStats.Sum(s => s.InsertTime.Ticks));
     var totalUpdateCount = perFileStats.Sum(s => s.UpdateCount);
+    var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
     var totalDeleteCount = perFileStats.Sum(s => s.DeleteCount);
     var totalOtherCount = perFileStats.Sum(s => s.OtherCount);
     var totalDbPercent = percent(totalFullTime, totalDBTime);
@@ -398,14 +442,18 @@ void PrintPerFileTable()
         totalPacks,
         totalDmains,
         formatTime(totalFullTime),
-        formatTime(totalDBTime),
-        totalDbPercent,
+        //formatTime(totalDBTime),
+        //totalDbPercent,
         totalAccCnt,
+        formatTimeWithPercent(totalAccTime, totalFullTime),
         totalSelectCount,
+        formatTimeWithPercent(totalSelectTime - totalAccTime, totalFullTime), //subtract account lock time from select time for better visibility
         totalInsertCount,
+        formatTimeWithPercent(totalInsertTime, totalFullTime),
         totalUpdateCount,
+        formatTimeWithPercent(totalUpdateTime, totalFullTime),
         totalDeleteCount,
         totalOtherCount);
 }
 
-record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, TimeSpan DBTime, long AccCnt, TimeSpan AccTime, long SelectCount, long InsertCount, long UpdateCount, long DeleteCount, long OtherCount);
+record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount);

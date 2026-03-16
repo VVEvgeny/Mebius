@@ -10,8 +10,9 @@ using System.Text;
 int mode = 0;//0-all,1-nop,2-mop 
 bool showByFile = true;
 bool sqlControls = true;
+string task = "881";//"812" or "881"
 
-var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_12_03_no_virt\");
+var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_efimov_06_03_2026\881\");
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Encoding enc = Encoding.GetEncoding(866);
@@ -45,187 +46,267 @@ var perFileStats = new List<FileStats>();
 
 foreach (var f in dir.GetFiles())
 {
-
-    if (f.Name.StartsWith("prof") && f.Name.Contains(".") && f.Name.Split(".")[0].EndsWith("_812"))
+    if (f.Name.StartsWith("prof") && f.Name.Contains(".") && f.Name.Split(".")[0].EndsWith("_" + task))
     {
         var fc = new StreamReader(f.FullName, encoding: enc).ReadToEnd();
         if (fc.Length == 0)
             continue;
 
-        string fullTime = "";
-        string packs = "0";
-        string dmains = "";
-        string dbTime = "";
-
-        string accCnt = "";
-        string accTime = "";
-
-        string transTime = "";
-
-        string selectCount = "";
-        string selectTime = "";
-        string insertCount = "";
-        string insertTime = "";
-        string updateCount = "";
-        string updateTime = "";
-        string deleteCount = "";
-        string otherCount = "";
-
-
-        foreach (var l in fc.Split("\n"))
+        if (task == "812")
         {
-            parseIf(l, "[-] |", "AppHandler::process - message_handler", 4, ref fullTime);
+            string fullTime = "";
+            string packs = "0";
+            string dmains = "";
+            string dbTime = "";
 
-            parseIf(l, "[-] |", "AppHandler812::GetPack", 2, ref packs);
+            string accCnt = "";
+            string accTime = "";
 
-            parseIf(l, "[-] |", "Сохранение документа Doc::__New", 2, ref dmains);
+            string transTime = "";
 
-            parseIf(l, "[-] |", "DocPackageClearance::CommitClearance()", 4, ref dbTime);
+            string selectCount = "";
+            string selectTime = "";
+            string insertCount = "";
+            string insertTime = "";
+            string updateCount = "";
+            string updateTime = "";
+            string deleteCount = "";
+            string otherCount = "";
 
-            parseIf(l, "[-] |", "DocPackageClearance::LockAccounts() блокировка счетов", 2, ref accCnt);
-            parseIf(l, "[-] |", "DocPackageClearance::LockAccounts() блокировка счетов", 4, ref accTime);
 
-            parseIf(l, "[-] |", "Библиотека QUEST: Завершение транзакции", 4, ref transTime);
-
-
-            parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 2, ref selectCount);
-            parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 2, ref selectCount);//old profiler format
-            parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 4, ref selectTime);
-            parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 4, ref selectTime);//old profiler format
-
-            parseIf(l, "[-] |", "Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 2, ref insertCount);
-            parseIf(l, "[-] |", "Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 4, ref insertTime);
-
-            parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 2, ref updateCount);
-            parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 4, ref updateTime);
-
-            parseIf(l, "[-] |", "Библиотека QUEST: Удаление из БД (выполнение DELETE)", 2, ref deleteCount);
-
-            parseIf(l, "[-] |", "Библиотека QUEST: Другие операции", 2, ref otherCount);
-
-        }
-
-        if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
-        {
-            if (showByFile)
+            foreach (var l in fc.Split("\n"))
             {
-                Console.WriteLine("Файл:" + f.Name + " - пустой, пропускаю");
+                parseIf(l, "[-] |", "AppHandler::process - message_handler", 4, ref fullTime);
+
+                parseIf(l, "[-] |", "AppHandler812::GetPack", 2, ref packs);
+
+                parseIf(l, "[-] |", "Сохранение документа Doc::__New", 2, ref dmains);
+
+                parseIf(l, "[-] |", "DocPackageClearance::CommitClearance()", 4, ref dbTime);
+
+                parseIf(l, "[-] |", "DocPackageClearance::LockAccounts() блокировка счетов", 2, ref accCnt);
+                parseIf(l, "[-] |", "DocPackageClearance::LockAccounts() блокировка счетов", 4, ref accTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Завершение транзакции", 4, ref transTime);
+
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 2, ref selectCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 2, ref selectCount);//old profiler format
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 4, ref selectTime);
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 4, ref selectTime);//old profiler format
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 2, ref insertCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Запись блока данных (выполнение FLUSH)", 4, ref insertTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 2, ref updateCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 4, ref updateTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Удаление из БД (выполнение DELETE)", 2, ref deleteCount);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Другие операции", 2, ref otherCount);
+
             }
-            continue;
-        }
 
-        if (mode == 0) { }
-        else if (mode == 1)
-        {
-            if (string.IsNullOrEmpty(accCnt))
-                continue; //ignore MOPS
-        }
-        else if (mode == 2)
-        {
+            if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
+            {
+                if (showByFile)
+                {
+                    Console.WriteLine("Файл:" + f.Name + " - пустой, пропускаю");
+                }
+                continue;
+            }
+
+            if (mode == 0) { }
+            else if (mode == 1)
+            {
+                if (string.IsNullOrEmpty(accCnt))
+                    continue; //ignore MOPS
+            }
+            else if (mode == 2)
+            {
+                if (!string.IsNullOrEmpty(accCnt))
+                    continue; //ignore MOPS
+            }
+
+            // if (showByFile)
+            // {
+            //     Console.WriteLine("Файл:" + f.Name + " - время обработки " + packs + " пакетов " + "(документов: " + dmains + "): " + fullTime
+            //     + ", сброс в БД: " + dbTime + " (" + percent(parseTime(fullTime), parseTime(dbTime)) + " % от общего времени)"
+            //     + (string.IsNullOrEmpty(accCnt) ? "" : (", ожидание блокировки " + accCnt + " счетов: " + accTime + " (" + percent(parseTime(fullTime), parseTime(accTime)) + " % от общего времени)"))
+            //     + (sqlControls ? (", SELECTs: " + selectCount + ", INSERTs: " + insertCount + ", UPDATEs: " + updateCount + ", DELETEs: " + deleteCount + ", OTHERs: " + otherCount) : "")
+            //     );
+            // }
+
+            perFileStats.Add(new FileStats(
+                f.Name,
+                long.Parse(packs),
+                long.Parse(dmains),
+                parseTime(fullTime),
+                string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
+                parseTime(accTime),
+                string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
+                parseTime(selectTime),
+                string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount),
+                parseTime(insertTime),
+                string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
+                parseTime(updateTime),
+                string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
+                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
+            ));
+
+            totalPacks += long.Parse(packs);
+            totalDmains += long.Parse(dmains);
+            totalFullTime += parseTime(fullTime);
+            totalDBTime += parseTime(dbTime);
+            totalTransTime += parseTime(transTime);
             if (!string.IsNullOrEmpty(accCnt))
-                continue; //ignore MOPS
+            {
+                totalAccCnt += long.Parse(accCnt);
+                totalAccTime += parseTime(accTime);
+
+                minAccCnt = Math.Min(minAccCnt, long.Parse(accCnt));
+                maxAccCnt = Math.Max(maxAccCnt, long.Parse(accCnt));
+                minAccTime = minAccTime < parseTime(accTime) ? minAccTime : parseTime(accTime);
+                maxAccTime = maxAccTime > parseTime(accTime) ? maxAccTime : parseTime(accTime);
+            }
+            minPacks = Math.Min(minPacks, long.Parse(packs));
+            maxPacks = Math.Max(maxPacks, long.Parse(packs));
+            minDmain = Math.Min(minDmain, long.Parse(dmains));
+            maxDmain = Math.Max(maxDmain, long.Parse(dmains));
+            minFullTime = minFullTime < parseTime(fullTime) ? minFullTime : parseTime(fullTime);
+            maxFullTime = maxFullTime > parseTime(fullTime) ? maxFullTime : parseTime(fullTime);
+            minDBTime = minDBTime < parseTime(dbTime) ? minDBTime : parseTime(dbTime);
+            maxDBTime = maxDBTime > parseTime(dbTime) ? maxDBTime : parseTime(dbTime);
+            minTransTime = minTransTime < parseTime(transTime) ? minTransTime : parseTime(transTime);
+            maxTransTime = maxTransTime > parseTime(transTime) ? maxTransTime : parseTime(transTime);
+
+            totalSelectCount += string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount);
+            totalInsertCount += string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount);
+            totalUpdateCount += string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount);
+            totalDeleteCount += string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount);
+            totalOtherCount += string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount);
+
+            totalSelectTime += parseTime(selectTime);
+            totalInsertTime += parseTime(insertTime);
+            totalUpdateTime += parseTime(updateTime);
         }
-
-        // if (showByFile)
-        // {
-        //     Console.WriteLine("Файл:" + f.Name + " - время обработки " + packs + " пакетов " + "(документов: " + dmains + "): " + fullTime
-        //     + ", сброс в БД: " + dbTime + " (" + percent(parseTime(fullTime), parseTime(dbTime)) + " % от общего времени)"
-        //     + (string.IsNullOrEmpty(accCnt) ? "" : (", ожидание блокировки " + accCnt + " счетов: " + accTime + " (" + percent(parseTime(fullTime), parseTime(accTime)) + " % от общего времени)"))
-        //     + (sqlControls ? (", SELECTs: " + selectCount + ", INSERTs: " + insertCount + ", UPDATEs: " + updateCount + ", DELETEs: " + deleteCount + ", OTHERs: " + otherCount) : "")
-        //     );
-        // }
-
-        perFileStats.Add(new FileStats(
-            f.Name,
-            long.Parse(packs),
-            long.Parse(dmains),
-            parseTime(fullTime),
-            string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
-            parseTime(accTime),
-            string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
-            parseTime(selectTime),
-            string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount),
-            parseTime(insertTime),
-            string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
-            parseTime(updateTime),
-            string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
-            string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
-        ));
-
-        totalPacks += long.Parse(packs);
-        totalDmains += long.Parse(dmains);
-        totalFullTime += parseTime(fullTime);
-        totalDBTime += parseTime(dbTime);
-        totalTransTime += parseTime(transTime);
-        if (!string.IsNullOrEmpty(accCnt))
+        else if (task == "881")
         {
-            totalAccCnt += long.Parse(accCnt);
-            totalAccTime += parseTime(accTime);
+            string fullTime = "";
+            string packs = "0";
+            string dmains = "";
+            string dbTime = "";
 
-            minAccCnt = Math.Min(minAccCnt, long.Parse(accCnt));
-            maxAccCnt = Math.Max(maxAccCnt, long.Parse(accCnt));
-            minAccTime = minAccTime < parseTime(accTime) ? minAccTime : parseTime(accTime);
-            maxAccTime = maxAccTime > parseTime(accTime) ? maxAccTime : parseTime(accTime);
+            string accCnt = "";
+            string accTime = "";
+
+            string transTime = "";
+
+            string selectCount = "";
+            string selectTime = "";
+            string insertCount = "";
+            string insertTime = "";
+            string updateCount = "";
+            string updateTime = "";
+            string deleteCount = "";
+            string otherCount = "";
+
+
+            foreach (var l in fc.Split("\n"))
+            {
+                parseIf(l, "[-] |", "ActualMessageHandler", 4, ref fullTime);
+
+                parseIf(l, "[-] |", "count_new_doc", 2, ref dmains);
+
+                parseIf(l, "[-] |", "SELECT_ACCOUNT", 2, ref accCnt);
+                parseIf(l, "[-] |", "SELECT_ACCOUNT", 4, ref accTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Завершение транзакции", 4, ref transTime);
+
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 2, ref selectCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 2, ref selectCount);//old profiler format
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT FIRST)", 4, ref selectTime);
+                parseIf(l, "[-] |", "Библиотека QUEST: Выбор из БД (выполнение SELECT)", 4, ref selectTime);//old profiler format
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Добавление в БД (выполнение INSERT)", 2, ref insertCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Добавление в БД (выполнение INSERT)", 4, ref insertTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 2, ref updateCount);
+                parseIf(l, "[-] |", "Библиотека QUEST: Изменение в БД (выполнение UPDATE)", 4, ref updateTime);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Удаление из БД (выполнение DELETE)", 2, ref deleteCount);
+
+                parseIf(l, "[-] |", "Библиотека QUEST: Другие операции", 2, ref otherCount);
+
+            }
+
+            if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
+            {
+                if (showByFile)
+                {
+                    Console.WriteLine("Файл:" + f.Name + " - пустой, пропускаю");
+                }
+                continue;
+            }
+
+            perFileStats.Add(new FileStats(
+                f.Name,
+                long.Parse(packs),
+                long.Parse(dmains),
+                parseTime(fullTime),
+                string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
+                parseTime(accTime),
+                string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
+                parseTime(selectTime),
+                string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount),
+                parseTime(insertTime),
+                string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
+                parseTime(updateTime),
+                string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
+                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
+            ));
+
+            totalPacks += long.Parse(packs);
+            totalDmains += long.Parse(dmains);
+            totalFullTime += parseTime(fullTime);
+            totalDBTime += parseTime(dbTime);
+            totalTransTime += parseTime(transTime);
+            if (!string.IsNullOrEmpty(accCnt))
+            {
+                totalAccCnt += long.Parse(accCnt);
+                totalAccTime += parseTime(accTime);
+
+                minAccCnt = Math.Min(minAccCnt, long.Parse(accCnt));
+                maxAccCnt = Math.Max(maxAccCnt, long.Parse(accCnt));
+                minAccTime = minAccTime < parseTime(accTime) ? minAccTime : parseTime(accTime);
+                maxAccTime = maxAccTime > parseTime(accTime) ? maxAccTime : parseTime(accTime);
+            }
+            minPacks = Math.Min(minPacks, long.Parse(packs));
+            maxPacks = Math.Max(maxPacks, long.Parse(packs));
+            minDmain = Math.Min(minDmain, long.Parse(dmains));
+            maxDmain = Math.Max(maxDmain, long.Parse(dmains));
+            minFullTime = minFullTime < parseTime(fullTime) ? minFullTime : parseTime(fullTime);
+            maxFullTime = maxFullTime > parseTime(fullTime) ? maxFullTime : parseTime(fullTime);
+            minDBTime = minDBTime < parseTime(dbTime) ? minDBTime : parseTime(dbTime);
+            maxDBTime = maxDBTime > parseTime(dbTime) ? maxDBTime : parseTime(dbTime);
+            minTransTime = minTransTime < parseTime(transTime) ? minTransTime : parseTime(transTime);
+            maxTransTime = maxTransTime > parseTime(transTime) ? maxTransTime : parseTime(transTime);
+
+            totalSelectCount += string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount);
+            totalInsertCount += string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount);
+            totalUpdateCount += string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount);
+            totalDeleteCount += string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount);
+            totalOtherCount += string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount);
+
+            totalSelectTime += parseTime(selectTime);
+            totalInsertTime += parseTime(insertTime);
+            totalUpdateTime += parseTime(updateTime);
         }
-        minPacks = Math.Min(minPacks, long.Parse(packs));
-        maxPacks = Math.Max(maxPacks, long.Parse(packs));
-        minDmain = Math.Min(minDmain, long.Parse(dmains));
-        maxDmain = Math.Max(maxDmain, long.Parse(dmains));
-        minFullTime = minFullTime < parseTime(fullTime) ? minFullTime : parseTime(fullTime);
-        maxFullTime = maxFullTime > parseTime(fullTime) ? maxFullTime : parseTime(fullTime);
-        minDBTime = minDBTime < parseTime(dbTime) ? minDBTime : parseTime(dbTime);
-        maxDBTime = maxDBTime > parseTime(dbTime) ? maxDBTime : parseTime(dbTime);
-        minTransTime = minTransTime < parseTime(transTime) ? minTransTime : parseTime(transTime);
-        maxTransTime = maxTransTime > parseTime(transTime) ? maxTransTime : parseTime(transTime);
-
-        totalSelectCount += string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount);
-        totalInsertCount += string.IsNullOrEmpty(insertCount) ? 0 : long.Parse(insertCount);
-        totalUpdateCount += string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount);
-        totalDeleteCount += string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount);
-        totalOtherCount += string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount);
-
-        totalSelectTime += parseTime(selectTime);
-        totalInsertTime += parseTime(insertTime);
-        totalUpdateTime += parseTime(updateTime);
-
     }
 }
 
-// string FormReport(bool useMinMax)
-// {
-//     StringBuilder sb = new StringBuilder();
-
-//     sb.Append("Общее - время обработки " + totalPacks.ToString().PadLeft(6) + " пакетов");
-//     if (useMinMax) sb.Append($" (min:{minPacks},max:{maxPacks})");
-
-//     sb.Append(" (документов: " + totalDmains.ToString().PadLeft(8));
-//     if (useMinMax) sb.Append($" (min:{minDmain},max:{maxDmain}))");
-//     sb.Append("): ");
-
-//     sb.Append(totalFullTime.ToString(@"hh\:mm\:ss\.fff"));
-//     sb.Append(", сброс в БД: " + totalDBTime.ToString(@"hh\:mm\:ss\.fff"));
-//     sb.Append(" (" + percent(totalFullTime, totalDBTime).ToString().PadLeft(3) + " % от общего времени)");
-
-
-//     if (totalAccCnt != 0)
-//     {
-//         sb.Append(", ожидание блокировки " + totalAccCnt.ToString().PadLeft(5) + " счетов : ");
-//         sb.Append(totalAccTime.ToString(@"hh\:mm\:ss\.fff"));
-//         sb.Append(" (" + percent(totalFullTime, totalAccTime).ToString().PadLeft(3) + " % от общего времени)");
-//     }
-//     if (sqlControls)
-//         sb.Append(" SQLS: Выборка:" + totalSelectCount.ToString().PadLeft(10) + ", Вставка:" + totalInsertCount.ToString().PadLeft(10) +
-//         ", Обновление:" + totalUpdateCount.ToString().PadLeft(10) + ", Удаление:" + totalDeleteCount.ToString().PadLeft(10) +
-//         ", Прочее:" + totalOtherCount.ToString().PadLeft(10));
-
-//     return sb.ToString();
-// }
-
-
-// Console.WriteLine(FormReport(false));
-
 PrintPerFileTable();
-
 
 int percent(TimeSpan total, TimeSpan selected)
 {

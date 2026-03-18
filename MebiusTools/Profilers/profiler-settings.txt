@@ -1,0 +1,5 @@
+Mode=0
+ShowByFile=True
+ShowStats=True
+Task=812
+DirPath=c:\_Code\Mebius\MebiusTools\Profilers\prof_12_03_2026_efimov_split\

@@ -1,18 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 
 #pragma warning disable
 
+const string settingsFile = "profiler-settings.txt";
+var settings = LoadSettings(settingsFile);
 
-int mode = 0;//0-all,1-nop,2-mop 
-bool showByFile = true;
-bool sqlControls = true;
-string task = "881";//"812" or "881"
+// If user requested --file <path>, skip interactive prompts and redirect output.
+var promptUser = true;
+var outputFile = (string?)null;
+for (var i = 0; i < args.Length; i++)
+{
+    if (args[i] == "--file" && i + 1 < args.Length)
+    {
+        outputFile = args[i + 1];
+        promptUser = false;
+        break;
+    }
+}
 
-var dir = new DirectoryInfo(@"c:\_Code\Mebius\MebiusTools\Profilers\prof_efimov_06_03_2026\881\");
+if (outputFile != null)
+{
+    var sw = new StreamWriter(outputFile) { AutoFlush = true };
+    Console.SetOut(sw);
+}
+
+var (mode, modeChanged) = ReadIntOption("Mode (0=all, 1=nop, 2=mop)", settings.Mode, new[] { 0, 1, 2 }, promptUser);
+var (showByFile, showByFileChanged) = ReadBoolOption("Show per-file table? (y/n)", settings.ShowByFile, promptUser);
+var (showStats, showStatsChanged) = ReadBoolOption("Show Docs/min stats? (y/n)", settings.ShowStats, promptUser);
+var (task, taskChanged) = ReadStringOption("Task (812/881)", settings.Task, new[] { "812", "881" }, promptUser);
+var (dirPath, dirPathChanged) = ReadStringOptionFree("Directory Path", settings.DirPath, promptUser);
+
+if (modeChanged || showByFileChanged || showStatsChanged || taskChanged || dirPathChanged)
+{
+    SaveSettings(settingsFile, new Settings(mode, showByFile, showStats, task, dirPath));
+}
+
+Console.WriteLine($"Selected: mode={mode}, showByFile={(showByFile ? "yes" : "no")}, showStats={(showStats ? "yes" : "no")}, task={task}, dir={dirPath}");
+
+var dir = new DirectoryInfo(dirPath);
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 Encoding enc = Encoding.GetEncoding(866);
@@ -366,33 +396,37 @@ string formatTimeWithPercent(TimeSpan t, TimeSpan total)
 
 void PrintPerFileTable()
 {
-    if (!showByFile || perFileStats.Count == 0)
+    if (perFileStats.Count == 0)
         return;
 
     const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,7} {5,13} {6,9} {7,13} {8,9} {9,13} {10,8} {11,13}";
 
     Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time");
-    Console.WriteLine(new string('-', 160));
+    
 
-    foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
+    if(showByFile)
     {
-        Console.WriteLine(headerFmt,
-            s.FileName,
-            s.Packs,
-            s.Dmains,
-            formatTime(s.FullTime),
-            s.AccCnt,
-            formatTimeWithPercent(s.AccTime, s.FullTime),
-            s.SelectCount,
-            formatTimeWithPercent(s.SelectTime - s.AccTime, s.FullTime), //subtract account lock time from select time for better visibility
-            s.InsertCount,
-            formatTimeWithPercent(s.InsertTime, s.FullTime),
-            s.UpdateCount,
-            formatTimeWithPercent(s.UpdateTime, s.FullTime));
+        Console.WriteLine(new string('-', 160));
+        foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
+        {
+            Console.WriteLine(headerFmt,
+                s.FileName,
+                s.Packs,
+                s.Dmains,
+                formatTime(s.FullTime),
+                s.AccCnt,
+                formatTimeWithPercent(s.AccTime, s.FullTime),
+                s.SelectCount,
+                formatTimeWithPercent(s.SelectTime - s.AccTime, s.FullTime), //subtract account lock time from select time for better visibility
+                s.InsertCount,
+                formatTimeWithPercent(s.InsertTime, s.FullTime),
+                s.UpdateCount,
+                formatTimeWithPercent(s.UpdateTime, s.FullTime));
+        }
+        Console.WriteLine(new string('-', 160));
     }
 
     // Summary row
-    Console.WriteLine(new string('-', 160));
     var totalPacks = perFileStats.Sum(s => s.Packs);
     var totalDmains = perFileStats.Sum(s => s.Dmains);
     var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
@@ -419,6 +453,126 @@ void PrintPerFileTable()
         formatTimeWithPercent(totalInsertTime, totalFullTime),
         totalUpdateCount,
         formatTimeWithPercent(totalUpdateTime, totalFullTime));
+
+    long per1min = totalDmains / (int)totalFullTime.TotalMinutes;
+    if (showStats)
+    {
+        Console.WriteLine("STATS:"
+            +"\n\tDocs per 1 min: " + per1min.ToString().PadLeft(6)
+            +"\n\tDocs per 5 min: " + (per1min * 5).ToString().PadLeft(6)
+        );
+    }
+
+
 }
+
+(int value, bool changed) ReadIntOption(string prompt, int defaultValue, int[] allowed, bool promptUser)
+{
+    if (!promptUser)
+        return (defaultValue, false);
+
+    while (true)
+    {
+        Console.Write($"{prompt} [{defaultValue}]: ");
+        var line = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(line))
+            return (defaultValue, false);
+        if (int.TryParse(line, out var v) && allowed.Contains(v))
+            return (v, true);
+        Console.WriteLine($"Invalid value. Allowed: {string.Join(", ", allowed)}");
+    }
+}
+
+(bool value, bool changed) ReadBoolOption(string prompt, bool defaultValue, bool promptUser)
+{
+    if (!promptUser)
+        return (defaultValue, false);
+
+    while (true)
+    {
+        Console.Write($"{prompt} [{(defaultValue ? "Y" : "N")}]: ");
+        var line = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(line))
+            return (defaultValue, false);
+        if (line.Equals("y", StringComparison.OrdinalIgnoreCase) || line.Equals("yes", StringComparison.OrdinalIgnoreCase))
+            return (true, true);
+        if (line.Equals("n", StringComparison.OrdinalIgnoreCase) || line.Equals("no", StringComparison.OrdinalIgnoreCase))
+            return (false, true);
+        Console.WriteLine("Invalid value. Please enter y or n.");
+    }
+}
+
+(string value, bool changed) ReadStringOption(string prompt, string defaultValue, string[] allowed, bool promptUser)
+{
+    if (!promptUser)
+        return (defaultValue, false);
+
+    while (true)
+    {
+        Console.Write($"{prompt} [{defaultValue}]: ");
+        var line = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(line))
+            return (defaultValue, false);
+        if (allowed.Contains(line))
+            return (line, true);
+        Console.WriteLine($"Invalid value. Allowed: {string.Join(", ", allowed)}");
+    }
+}
+Settings LoadSettings(string path)
+{
+    var settings = new Settings(0, true, false, "812", @"c:\_Code\Mebius\MebiusTools\Profilers\prof_12_03_2026_efimov_split\");
+    if (!File.Exists(path))
+        return settings;
+
+    foreach (var line in File.ReadAllLines(path))
+    {
+        var parts = line.Split('=', 2);
+        if (parts.Length != 2)
+            continue;
+        var key = parts[0].Trim();
+        var value = parts[1].Trim();
+
+        if (key.Equals("Mode", StringComparison.OrdinalIgnoreCase) && int.TryParse(value, out var m))
+            settings = settings with { Mode = m };
+        else if (key.Equals("ShowByFile", StringComparison.OrdinalIgnoreCase) && bool.TryParse(value, out var b))
+            settings = settings with { ShowByFile = b };
+        else if (key.Equals("Task", StringComparison.OrdinalIgnoreCase))
+            settings = settings with { Task = value };
+        else if (key.Equals("DirPath", StringComparison.OrdinalIgnoreCase))
+            settings = settings with { DirPath = value };
+        else if (key.Equals("ShowStats", StringComparison.OrdinalIgnoreCase) && bool.TryParse(value, out var ss))
+            settings = settings with { ShowStats = ss };
+    }
+
+    return settings;
+}
+
+void SaveSettings(string path, Settings settings)
+{
+    var lines = new[]
+    {
+        $"Mode={settings.Mode}",
+        $"ShowByFile={settings.ShowByFile}",
+        $"ShowStats={settings.ShowStats}",
+        $"Task={settings.Task}",
+        $"DirPath={settings.DirPath}",
+    };
+
+    File.WriteAllLines(path, lines);
+}
+
+(string value, bool changed) ReadStringOptionFree(string prompt, string defaultValue, bool promptUser)
+{
+    if (!promptUser)
+        return (defaultValue, false);
+
+    Console.Write($"{prompt} [{defaultValue}]: ");
+    var line = Console.ReadLine()?.Trim();
+    if (string.IsNullOrEmpty(line))
+        return (defaultValue, false);
+    return (line, true);
+}
+
+record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath);
 
 record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount);

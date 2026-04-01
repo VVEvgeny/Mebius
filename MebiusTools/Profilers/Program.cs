@@ -32,7 +32,7 @@ if (outputFile != null)
 var (mode, modeChanged) = ReadIntOption("Mode (0=all, 1=nop, 2=mop)", settings.Mode, new[] { 0, 1, 2 }, promptUser);
 var (showByFile, showByFileChanged) = ReadBoolOption("Show per-file table? (y/n)", settings.ShowByFile, promptUser);
 var (showStats, showStatsChanged) = ReadBoolOption("Show Docs/min stats? (y/n)", settings.ShowStats, promptUser);
-var (task, taskChanged) = ReadStringOption("Task (812/881)", settings.Task, new[] { "812", "881" }, promptUser);
+var (task, taskChanged) = ReadStringOption("Task (812/837/881)", settings.Task, new[] { "812", "881","837" }, promptUser);
 var (dirPath, dirPathChanged) = ReadStringOptionFree("Directory Path", settings.DirPath, promptUser);
 
 if (modeChanged || showByFileChanged || showStatsChanged || taskChanged || dirPathChanged)
@@ -72,6 +72,9 @@ TimeSpan totalSelectTime = TimeSpan.Zero;
 TimeSpan totalInsertTime = TimeSpan.Zero;
 TimeSpan totalUpdateTime = TimeSpan.Zero;
 
+long totalSysLogCount = 0;
+TimeSpan totalSysLogTime = TimeSpan.Zero;
+
 var perFileStats = new List<FileStats>();
 
 foreach (var f in dir.GetFiles())
@@ -82,7 +85,7 @@ foreach (var f in dir.GetFiles())
         if (fc.Length == 0)
             continue;
 
-        if (task == "812")
+        if (task == "812" || task == "837")
         {
             string fullTime = "";
             string packs = "0";
@@ -102,6 +105,9 @@ foreach (var f in dir.GetFiles())
             string updateTime = "";
             string deleteCount = "";
             string otherCount = "";
+
+            string sysLogCount = "";
+            string sysLogTime = "";
 
 
             foreach (var l in fc.Split("\n"))
@@ -135,6 +141,8 @@ foreach (var f in dir.GetFiles())
 
                 parseIf(l, "[-] |", "Библиотека QUEST: Другие операции", 2, ref otherCount);
 
+                parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 2, ref sysLogCount);
+                parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 4, ref sysLogTime);
             }
 
             if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
@@ -181,7 +189,9 @@ foreach (var f in dir.GetFiles())
                 string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
                 parseTime(updateTime),
                 string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
-                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
+                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount),
+                string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount),
+                parseTime(sysLogTime)
             ));
 
             totalPacks += long.Parse(packs);
@@ -219,6 +229,9 @@ foreach (var f in dir.GetFiles())
             totalSelectTime += parseTime(selectTime);
             totalInsertTime += parseTime(insertTime);
             totalUpdateTime += parseTime(updateTime);
+
+            totalSysLogCount += string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount);
+            totalSysLogTime += parseTime(sysLogTime);
         }
         else if (task == "881")
         {
@@ -240,7 +253,8 @@ foreach (var f in dir.GetFiles())
             string updateTime = "";
             string deleteCount = "";
             string otherCount = "";
-
+            string sysLogCount = "";
+            string sysLogTime = "";
 
             foreach (var l in fc.Split("\n"))
             {
@@ -269,6 +283,8 @@ foreach (var f in dir.GetFiles())
 
                 parseIf(l, "[-] |", "Библиотека QUEST: Другие операции", 2, ref otherCount);
 
+                parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 2, ref sysLogCount);
+                parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 4, ref sysLogTime);
             }
 
             if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
@@ -294,7 +310,9 @@ foreach (var f in dir.GetFiles())
                 string.IsNullOrEmpty(updateCount) ? 0 : long.Parse(updateCount),
                 parseTime(updateTime),
                 string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
-                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount)
+                string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount),
+                string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount),
+                parseTime(sysLogTime)
             ));
 
             totalPacks += long.Parse(packs);
@@ -332,6 +350,9 @@ foreach (var f in dir.GetFiles())
             totalSelectTime += parseTime(selectTime);
             totalInsertTime += parseTime(insertTime);
             totalUpdateTime += parseTime(updateTime);
+
+            totalSysLogCount += string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount);
+            totalSysLogTime += parseTime(sysLogTime);
         }
     }
 }
@@ -399,14 +420,13 @@ void PrintPerFileTable()
     if (perFileStats.Count == 0)
         return;
 
-    const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,7} {5,13} {6,9} {7,13} {8,9} {9,13} {10,8} {11,13}";
+    const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,7} {5,13} {6,9} {7,13} {8,9} {9,13} {10,8} {11,13} {12,8} {13,13}";
 
-    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time");
-    
+    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
 
     if(showByFile)
     {
-        Console.WriteLine(new string('-', 160));
+        Console.WriteLine(new string('-', 185));
         foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
         {
             Console.WriteLine(headerFmt,
@@ -421,9 +441,12 @@ void PrintPerFileTable()
                 s.InsertCount,
                 formatTimeWithPercent(s.InsertTime, s.FullTime),
                 s.UpdateCount,
-                formatTimeWithPercent(s.UpdateTime, s.FullTime));
+                formatTimeWithPercent(s.UpdateTime, s.FullTime),
+                s.SysLogCount,
+                formatTimeWithPercent(s.SysLogTime, s.FullTime)
+                );
         }
-        Console.WriteLine(new string('-', 160));
+        Console.WriteLine(new string('-', 185));
     }
 
     // Summary row
@@ -439,6 +462,8 @@ void PrintPerFileTable()
     var totalUpdateCount = perFileStats.Sum(s => s.UpdateCount);
     var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
     var totalDbPercent = percent(totalFullTime, totalDBTime);
+    var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
+    var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
 
     Console.WriteLine(headerFmt,
         "TOTAL",
@@ -452,7 +477,10 @@ void PrintPerFileTable()
         totalInsertCount,
         formatTimeWithPercent(totalInsertTime, totalFullTime),
         totalUpdateCount,
-        formatTimeWithPercent(totalUpdateTime, totalFullTime));
+        formatTimeWithPercent(totalUpdateTime, totalFullTime),
+        totalSysLogCount,
+        formatTimeWithPercent(totalSysLogTime, totalFullTime)
+        );
 
     long per1min = totalDmains / (int)totalFullTime.TotalMinutes;
     if (showStats)
@@ -462,8 +490,6 @@ void PrintPerFileTable()
             +"\n\tDocs per 5 min: " + (per1min * 5).ToString().PadLeft(6)
         );
     }
-
-
 }
 
 (int value, bool changed) ReadIntOption(string prompt, int defaultValue, int[] allowed, bool promptUser)
@@ -575,4 +601,4 @@ void SaveSettings(string path, Settings settings)
 
 record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath);
 
-record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount);
+record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime);

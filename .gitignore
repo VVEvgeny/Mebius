@@ -253,3 +253,5 @@ paket-files/
 MebiusTools/Profilers/prof*/*
 MebiusTools/Profilers/ef_all.txt
 wdebug.*
+MebiusTools/Profilers/.vscode/settings.json
+MebiusTools/Profilers/*.txt

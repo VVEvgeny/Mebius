@@ -32,15 +32,16 @@ if (outputFile != null)
 var (mode, modeChanged) = ReadIntOption("Mode (0=all, 1=nop, 2=mop)", settings.Mode, new[] { 0, 1, 2 }, promptUser);
 var (showByFile, showByFileChanged) = ReadBoolOption("Show per-file table? (y/n)", settings.ShowByFile, promptUser);
 var (showStats, showStatsChanged) = ReadBoolOption("Show Docs/min stats? (y/n)", settings.ShowStats, promptUser);
+var (csvFormat, csvFormatChanged) = ReadBoolOption("Output in CSV format? (y/n)", settings.CsvFormat, promptUser);
 var (task, taskChanged) = ReadStringOption("Task (812/837/881/880)", settings.Task, new[] { "812", "881","837","880" }, promptUser);
 var (dirPath, dirPathChanged) = ReadStringOptionFree("Directory Path", settings.DirPath, promptUser);
 
-if (modeChanged || showByFileChanged || showStatsChanged || taskChanged || dirPathChanged)
+if (modeChanged || showByFileChanged || showStatsChanged || taskChanged || dirPathChanged || csvFormatChanged)
 {
-    SaveSettings(settingsFile, new Settings(mode, showByFile, showStats, task, dirPath));
+    SaveSettings(settingsFile, new Settings(mode, showByFile, showStats, task, dirPath, csvFormat));
 }
 
-Console.WriteLine($"Selected: mode={mode}, showByFile={(showByFile ? "yes" : "no")}, showStats={(showStats ? "yes" : "no")}, task={task}, dir={dirPath}");
+Console.WriteLine($"Selected: mode={mode}, showByFile={(showByFile ? "yes" : "no")}, showStats={(showStats ? "yes" : "no")}, task={task}, dir={dirPath}, csvFormat={(csvFormat ? "yes" : "no")}");
 
 var dir = new DirectoryInfo(dirPath);
 
@@ -365,7 +366,7 @@ foreach (var f in dir.GetFiles())
     }
 }
 
-PrintPerFileTable();
+PrintPerFileTable(csvFormat);
 
 int percent(TimeSpan total, TimeSpan selected)
 {
@@ -423,84 +424,131 @@ string formatTimeWithPercent(TimeSpan t, TimeSpan total)
     return $"{totalMinutes,3}:{t.Seconds:00} ({p,2}%)";
 }
 
-void PrintPerFileTable()
+void PrintPerFileTable(bool csvMode = false)
 {
     if (perFileStats.Count == 0)
         return;
 
-    const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13}";
-
-    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
-
-    if(showByFile)
+    if (csvMode)
     {
-        Console.WriteLine(new string('-', 185));
+        // CSV headers
+        Console.WriteLine("File,Packs,Docs,FullTime,MaxTime,Accs,AccTime,SELECT,SelectTime,INSERT,InsertTime,UPDATE,UpdateTime,SysLog,SysLogTime");
+
+        // Individual file rows
         foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
         {
-            Console.WriteLine(headerFmt,
-                s.FileName,
-                s.Packs,
-                s.Dmains,
-                formatTime(s.FullTime),
-                formatTime(s.MaxTime),
-                s.AccCnt,
-                formatTimeWithPercent(s.AccTime, s.FullTime),
-                s.SelectCount,
-                formatTimeWithPercent(s.SelectTime - s.AccTime, s.FullTime), //subtract account lock time from select time for better visibility
-                s.InsertCount,
-                formatTimeWithPercent(s.InsertTime, s.FullTime),
-                s.UpdateCount,
-                formatTimeWithPercent(s.UpdateTime, s.FullTime),
-                s.SysLogCount,
-                formatTimeWithPercent(s.SysLogTime, s.FullTime)
-                );
+            Console.WriteLine($"{EscapeCsv(s.FileName)},{s.Packs},{s.Dmains},{(s.FullTime)},{(s.MaxTime)},{s.AccCnt},{(s.AccTime)},{s.SelectCount},{(s.SelectTime - s.AccTime)},{s.InsertCount},{(s.InsertTime)},{s.UpdateCount},{(s.UpdateTime)},{s.SysLogCount},{(s.SysLogTime)}");
         }
-        Console.WriteLine(new string('-', 185));
+
+        // Summary row
+        var totalPacks = perFileStats.Sum(s => s.Packs);
+        var totalDmains = perFileStats.Sum(s => s.Dmains);
+        var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
+        var totalMaxTime = new TimeSpan(perFileStats.Max(s => s.MaxTime.Ticks));
+        var totalAccCnt = perFileStats.Sum(s => s.AccCnt);
+        var totalAccTime = new TimeSpan(perFileStats.Sum(s => s.AccTime.Ticks));
+        var totalSelectCount = perFileStats.Sum(s => s.SelectCount);
+        var totalSelectTime = new TimeSpan(perFileStats.Sum(s => s.SelectTime.Ticks));
+        var totalInsertCount = perFileStats.Sum(s => s.InsertCount);
+        var totalInsertTime = new TimeSpan(perFileStats.Sum(s => s.InsertTime.Ticks));
+        var totalUpdateCount = perFileStats.Sum(s => s.UpdateCount);
+        var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
+        var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
+        var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
+
+        Console.WriteLine($"TOTAL,{totalPacks},{totalDmains},{(totalFullTime)},{(totalMaxTime)},{totalAccCnt},{(totalAccTime)},{totalSelectCount},{(totalSelectTime - totalAccTime)},{totalInsertCount},{(totalInsertTime)},{totalUpdateCount},{(totalUpdateTime)},{totalSysLogCount},{(totalSysLogTime)}");
+
+        long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
+        if (showStats)
+        {
+            Console.WriteLine($"# STATS: Docs per 1 min: {per1min}, Docs per 5 min: {per1min * 5}");
+        }
     }
-
-    // Summary row
-    var totalPacks = perFileStats.Sum(s => s.Packs);
-    var totalDmains = perFileStats.Sum(s => s.Dmains);
-    var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
-    var totalMaxTime = new TimeSpan(perFileStats.Max(s => s.MaxTime.Ticks));
-    var totalAccCnt = perFileStats.Sum(s => s.AccCnt);
-    var totalAccTime = new TimeSpan(perFileStats.Sum(s => s.AccTime.Ticks));
-    var totalSelectCount = perFileStats.Sum(s => s.SelectCount);
-    var totalSelectTime = new TimeSpan(perFileStats.Sum(s => s.SelectTime.Ticks));
-    var totalInsertCount = perFileStats.Sum(s => s.InsertCount);
-    var totalInsertTime = new TimeSpan(perFileStats.Sum(s => s.InsertTime.Ticks));
-    var totalUpdateCount = perFileStats.Sum(s => s.UpdateCount);
-    var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
-    var totalDbPercent = percent(totalFullTime, totalDBTime);
-    var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
-    var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
-
-    Console.WriteLine(headerFmt,
-        "TOTAL",
-        totalPacks,
-        totalDmains,
-        formatTime(totalFullTime),
-        formatTime(totalMaxTime),
-        totalAccCnt,
-        formatTimeWithPercent(totalAccTime, totalFullTime),
-        totalSelectCount,
-        formatTimeWithPercent(totalSelectTime - totalAccTime, totalFullTime), //subtract account lock time from select time for better visibility
-        totalInsertCount,
-        formatTimeWithPercent(totalInsertTime, totalFullTime),
-        totalUpdateCount,
-        formatTimeWithPercent(totalUpdateTime, totalFullTime),
-        totalSysLogCount,
-        formatTimeWithPercent(totalSysLogTime, totalFullTime)
-        );
-
-    long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
-    if (showStats)
+    else
     {
-        Console.WriteLine("STATS:"
-            +"\n\tDocs per 1 min: " + per1min.ToString().PadLeft(6)
-            +"\n\tDocs per 5 min: " + (per1min * 5).ToString().PadLeft(6)
-        );
+        const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13}";
+
+        Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
+
+        if(showByFile)
+        {
+            Console.WriteLine(new string('-', 185));
+            foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
+            {
+                Console.WriteLine(headerFmt,
+                    s.FileName,
+                    s.Packs,
+                    s.Dmains,
+                    formatTime(s.FullTime),
+                    formatTime(s.MaxTime),
+                    s.AccCnt,
+                    formatTimeWithPercent(s.AccTime, s.FullTime),
+                    s.SelectCount,
+                    formatTimeWithPercent(s.SelectTime - s.AccTime, s.FullTime), //subtract account lock time from select time for better visibility
+                    s.InsertCount,
+                    formatTimeWithPercent(s.InsertTime, s.FullTime),
+                    s.UpdateCount,
+                    formatTimeWithPercent(s.UpdateTime, s.FullTime),
+                    s.SysLogCount,
+                    formatTimeWithPercent(s.SysLogTime, s.FullTime)
+                    );
+            }
+            Console.WriteLine(new string('-', 185));
+        }
+
+        // Summary row
+        var totalPacks = perFileStats.Sum(s => s.Packs);
+        var totalDmains = perFileStats.Sum(s => s.Dmains);
+        var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
+        var totalMaxTime = new TimeSpan(perFileStats.Max(s => s.MaxTime.Ticks));
+        var totalAccCnt = perFileStats.Sum(s => s.AccCnt);
+        var totalAccTime = new TimeSpan(perFileStats.Sum(s => s.AccTime.Ticks));
+        var totalSelectCount = perFileStats.Sum(s => s.SelectCount);
+        var totalSelectTime = new TimeSpan(perFileStats.Sum(s => s.SelectTime.Ticks));
+        var totalInsertCount = perFileStats.Sum(s => s.InsertCount);
+        var totalInsertTime = new TimeSpan(perFileStats.Sum(s => s.InsertTime.Ticks));
+        var totalUpdateCount = perFileStats.Sum(s => s.UpdateCount);
+        var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
+        var totalDbPercent = percent(totalFullTime, totalDBTime);
+        var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
+        var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
+
+        Console.WriteLine(headerFmt,
+            "TOTAL",
+            totalPacks,
+            totalDmains,
+            formatTime(totalFullTime),
+            formatTime(totalMaxTime),
+            totalAccCnt,
+            formatTimeWithPercent(totalAccTime, totalFullTime),
+            totalSelectCount,
+            formatTimeWithPercent(totalSelectTime - totalAccTime, totalFullTime), //subtract account lock time from select time for better visibility
+            totalInsertCount,
+            formatTimeWithPercent(totalInsertTime, totalFullTime),
+            totalUpdateCount,
+            formatTimeWithPercent(totalUpdateTime, totalFullTime),
+            totalSysLogCount,
+            formatTimeWithPercent(totalSysLogTime, totalFullTime)
+            );
+
+        long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
+        if (showStats)
+        {
+            Console.WriteLine("STATS:"
+                +"\n\tDocs per 1 min: " + per1min.ToString().PadLeft(6)
+                +"\n\tDocs per 5 min: " + (per1min * 5).ToString().PadLeft(6)
+            );
+        }
     }
+}
+
+string EscapeCsv(string value)
+{
+    if (value.Contains(',') || value.Contains('"') || value.Contains('\n'))
+    {
+        return "\"" + value.Replace("\"", "\"\"") + "\"";
+    }
+    return value;
 }
 
 (int value, bool changed) ReadIntOption(string prompt, int defaultValue, int[] allowed, bool promptUser)
@@ -557,7 +605,7 @@ void PrintPerFileTable()
 }
 Settings LoadSettings(string path)
 {
-    var settings = new Settings(0, true, false, "812", @"c:\_Code\Mebius\MebiusTools\Profilers\prof_12_03_2026_efimov_split\");
+    var settings = new Settings(0, true, false, "812", @"c:\_Code\Mebius\MebiusTools\Profilers\prof_12_03_2026_efimov_split\", false);
     if (!File.Exists(path))
         return settings;
 
@@ -579,6 +627,8 @@ Settings LoadSettings(string path)
             settings = settings with { DirPath = value };
         else if (key.Equals("ShowStats", StringComparison.OrdinalIgnoreCase) && bool.TryParse(value, out var ss))
             settings = settings with { ShowStats = ss };
+        else if (key.Equals("CsvFormat", StringComparison.OrdinalIgnoreCase) && bool.TryParse(value, out var cf))
+            settings = settings with { CsvFormat = cf };
     }
 
     return settings;
@@ -610,6 +660,6 @@ void SaveSettings(string path, Settings settings)
     return (line, true);
 }
 
-record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath);
+record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath, bool CsvFormat);
 
 record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, TimeSpan MaxTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime);

@@ -32,7 +32,7 @@ if (outputFile != null)
 var (mode, modeChanged) = ReadIntOption("Mode (0=all, 1=nop, 2=mop)", settings.Mode, new[] { 0, 1, 2 }, promptUser);
 var (showByFile, showByFileChanged) = ReadBoolOption("Show per-file table? (y/n)", settings.ShowByFile, promptUser);
 var (showStats, showStatsChanged) = ReadBoolOption("Show Docs/min stats? (y/n)", settings.ShowStats, promptUser);
-var (task, taskChanged) = ReadStringOption("Task (812/837/881)", settings.Task, new[] { "812", "881","837" }, promptUser);
+var (task, taskChanged) = ReadStringOption("Task (812/837/881/880)", settings.Task, new[] { "812", "881","837","880" }, promptUser);
 var (dirPath, dirPathChanged) = ReadStringOptionFree("Directory Path", settings.DirPath, promptUser);
 
 if (modeChanged || showByFileChanged || showStatsChanged || taskChanged || dirPathChanged)
@@ -50,6 +50,7 @@ Encoding enc = Encoding.GetEncoding(866);
 long totalPacks = 0;
 long totalDmains = 0;
 TimeSpan totalFullTime = TimeSpan.Zero;
+TimeSpan totalMaxTime = TimeSpan.Zero;
 TimeSpan totalDBTime = TimeSpan.Zero;
 long totalAccCnt = 0;
 TimeSpan totalAccTime = TimeSpan.Zero;
@@ -88,6 +89,7 @@ foreach (var f in dir.GetFiles())
         if (task == "812" || task == "837")
         {
             string fullTime = "";
+            string maxTime = "";
             string packs = "0";
             string dmains = "";
             string dbTime = "";
@@ -113,6 +115,7 @@ foreach (var f in dir.GetFiles())
             foreach (var l in fc.Split("\n"))
             {
                 parseIf(l, "[-] |", "AppHandler::process - message_handler", 4, ref fullTime);
+                parseIf(l, "[-] |", "AppHandler::process - message_handler", 5, ref maxTime);
 
                 parseIf(l, "[-] |", "AppHandler812::GetPack", 2, ref packs);
 
@@ -180,6 +183,7 @@ foreach (var f in dir.GetFiles())
                 long.Parse(packs),
                 long.Parse(dmains),
                 parseTime(fullTime),
+                parseTime(maxTime),
                 string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
                 parseTime(accTime),
                 string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
@@ -233,9 +237,10 @@ foreach (var f in dir.GetFiles())
             totalSysLogCount += string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount);
             totalSysLogTime += parseTime(sysLogTime);
         }
-        else if (task == "881")
+        else if (task == "881" || task == "880")
         {
             string fullTime = "";
+            string maxTime = "";
             string packs = "0";
             string dmains = "";
             string dbTime = "";
@@ -259,6 +264,7 @@ foreach (var f in dir.GetFiles())
             foreach (var l in fc.Split("\n"))
             {
                 parseIf(l, "[-] |", "ActualMessageHandler", 4, ref fullTime);
+                parseIf(l, "[-] |", "ActualMessageHandler", 5, ref maxTime);
 
                 parseIf(l, "[-] |", "count_new_doc", 2, ref dmains);
 
@@ -301,6 +307,7 @@ foreach (var f in dir.GetFiles())
                 long.Parse(packs),
                 long.Parse(dmains),
                 parseTime(fullTime),
+                parseTime(maxTime),
                 string.IsNullOrEmpty(accCnt) ? 0 : long.Parse(accCnt),
                 parseTime(accTime),
                 string.IsNullOrEmpty(selectCount) ? 0 : long.Parse(selectCount),
@@ -318,6 +325,7 @@ foreach (var f in dir.GetFiles())
             totalPacks += long.Parse(packs);
             totalDmains += long.Parse(dmains);
             totalFullTime += parseTime(fullTime);
+            totalMaxTime = parseTime(maxTime);
             totalDBTime += parseTime(dbTime);
             totalTransTime += parseTime(transTime);
             if (!string.IsNullOrEmpty(accCnt))
@@ -420,9 +428,9 @@ void PrintPerFileTable()
     if (perFileStats.Count == 0)
         return;
 
-    const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,7} {5,13} {6,9} {7,13} {8,9} {9,13} {10,8} {11,13} {12,8} {13,13}";
+    const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13}";
 
-    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
+    Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
 
     if(showByFile)
     {
@@ -434,6 +442,7 @@ void PrintPerFileTable()
                 s.Packs,
                 s.Dmains,
                 formatTime(s.FullTime),
+                formatTime(s.MaxTime),
                 s.AccCnt,
                 formatTimeWithPercent(s.AccTime, s.FullTime),
                 s.SelectCount,
@@ -453,6 +462,7 @@ void PrintPerFileTable()
     var totalPacks = perFileStats.Sum(s => s.Packs);
     var totalDmains = perFileStats.Sum(s => s.Dmains);
     var totalFullTime = new TimeSpan(perFileStats.Sum(s => s.FullTime.Ticks));
+    var totalMaxTime = new TimeSpan(perFileStats.Max(s => s.MaxTime.Ticks));
     var totalAccCnt = perFileStats.Sum(s => s.AccCnt);
     var totalAccTime = new TimeSpan(perFileStats.Sum(s => s.AccTime.Ticks));
     var totalSelectCount = perFileStats.Sum(s => s.SelectCount);
@@ -470,6 +480,7 @@ void PrintPerFileTable()
         totalPacks,
         totalDmains,
         formatTime(totalFullTime),
+        formatTime(totalMaxTime),
         totalAccCnt,
         formatTimeWithPercent(totalAccTime, totalFullTime),
         totalSelectCount,
@@ -482,7 +493,7 @@ void PrintPerFileTable()
         formatTimeWithPercent(totalSysLogTime, totalFullTime)
         );
 
-    long per1min = totalDmains / (int)totalFullTime.TotalMinutes;
+    long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
     if (showStats)
     {
         Console.WriteLine("STATS:"
@@ -601,4 +612,4 @@ void SaveSettings(string path, Settings settings)
 
 record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath);
 
-record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime);
+record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, TimeSpan MaxTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime);

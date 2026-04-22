@@ -254,4 +254,5 @@ MebiusTools/Profilers/prof*/*
 MebiusTools/Profilers/ef_all.txt
 wdebug.*
 MebiusTools/Profilers/.vscode/settings.json
-MebiusTools/Profilers/*.txt
+MebiusTools/Profilers/*
+MebiusTools/Profilers/profiler-settings.txt

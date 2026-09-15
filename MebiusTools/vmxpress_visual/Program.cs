@@ -84,6 +84,15 @@ var movedInSecond = times.GroupBy(x => x.EndTime.AddMilliseconds(-x.EndTime.Mill
                     .Select(g => new { EndTime = g.Key, Count = g.Count() })
                     .OrderBy(x => x.EndTime);
 
+var lagSecondsInSecond = times.GroupBy(x => x.EndTime.AddMilliseconds(-x.EndTime.Millisecond))
+                    .Select(g => new { EndTime = g.Key, Count = g.Average(x => x.TimeInQ.TotalSeconds) })
+                    .OrderBy(x => x.EndTime);
+
+//size for sec = in up to this second - moved up to this second
+ var qSize = movedInSecond.Select(g => new { EndTime = g.EndTime, 
+            Count = (inInSecond.Where(z=>z.StartTime<g.EndTime).Sum(y=>y.Count) - movedInSecond.Where(z=>z.EndTime<g.EndTime).Sum(y=>y.Count)) })
+                    .OrderBy(x => x.EndTime);
+
 int i = 0;
 /*
 Console.WriteLine($"New messages in queue per second:");
@@ -110,9 +119,11 @@ foreach(var s in dState.OrderBy(x=>x.Key))
 // Generate PNG chart visualization
 GenerateChart(inInSecond.Select(x => (x.StartTime, x.Count)), "New Messages in Queue Per Second");
 GenerateChart(movedInSecond.Select(x => (x.EndTime, x.Count)), "Moved Messages Per Second");
+GenerateChart(lagSecondsInSecond.Select(x => (x.EndTime, (int)x.Count)), "AVG Lag Seconds Per Second", "Average Lag (seconds)");
+//GenerateChart(qSize.Select(x => (x.EndTime, x.Count)), "Queue Size Per Second", "Queue Size");
 
 
-static void GenerateChart(IEnumerable<(DateTime Time, int Count)> data, string title)
+static void GenerateChart(IEnumerable<(DateTime Time, int Count)> data, string title, string leftText = "Messages Count")
 {
     try
     {
@@ -147,11 +158,11 @@ static void GenerateChart(IEnumerable<(DateTime Time, int Count)> data, string t
         // Customize plot
         plot.Title(title);
         plot.XLabel($"Time: {dataList[0].Time:HH:mm:ss} - {dataList.Last().Time:HH:mm:ss} (seconds elapsed)");
-        plot.YLabel("Message Count");
+        plot.YLabel(leftText);
 
         // Save as PNG
         string outputPath = Path.Combine(Directory.GetCurrentDirectory(), $"{title.Replace(" ", "_")}.png");
-        plot.SavePng(outputPath, width: 1200, height: 600);
+        plot.SavePng(outputPath, width: 2000, height: 500);
         Console.WriteLine($"\nChart saved to: {Path.GetFullPath(outputPath)}");
     }
     catch (Exception ex)

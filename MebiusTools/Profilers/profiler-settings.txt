@@ -2,4 +2,4 @@ Mode=0
 ShowByFile=True
 ShowStats=True
 Task=812
-DirPath=c:\_Code\Mebius\MebiusTools\Profilers\prof_22_04_2026\x\
+DirPath=c:\_Code\Mebius\MebiusTools\Profilers\prof_23_08_2026\

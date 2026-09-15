@@ -76,6 +76,7 @@ TimeSpan totalUpdateTime = TimeSpan.Zero;
 
 long totalSysLogCount = 0;
 TimeSpan totalSysLogTime = TimeSpan.Zero;
+TimeSpan totalDisabledSystemTime = TimeSpan.Zero;
 
 var perFileStats = new List<FileStats>();
 
@@ -112,6 +113,7 @@ foreach (var f in dir.GetFiles())
             string sysLogCount = "";
             string sysLogTime = "";
 
+            string disabledSystemTime = "";
 
             foreach (var l in fc.Split("\n"))
             {
@@ -147,6 +149,10 @@ foreach (var f in dir.GetFiles())
 
                 parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 2, ref sysLogCount);
                 parseIf(l, "[-] |", "Запись события в syslog. JournalSys::Event", 4, ref sysLogTime);
+
+                //
+                //
+                parseIf(l, "[-] |", "AppHandlerHeir::message_handler - IsSubsystemWorkDisabled", 4, ref disabledSystemTime);
             }
 
             if (string.IsNullOrEmpty(fullTime) || string.IsNullOrEmpty(dmains))
@@ -196,7 +202,8 @@ foreach (var f in dir.GetFiles())
                 string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
                 string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount),
                 string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount),
-                parseTime(sysLogTime)
+                parseTime(sysLogTime),
+                parseTime(disabledSystemTime)
             ));
 
             totalPacks += long.Parse(packs);
@@ -237,6 +244,8 @@ foreach (var f in dir.GetFiles())
 
             totalSysLogCount += string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount);
             totalSysLogTime += parseTime(sysLogTime);
+
+            totalDisabledSystemTime += parseTime(disabledSystemTime);
         }
         else if (task == "881" || task == "880")
         {
@@ -320,7 +329,8 @@ foreach (var f in dir.GetFiles())
                 string.IsNullOrEmpty(deleteCount) ? 0 : long.Parse(deleteCount),
                 string.IsNullOrEmpty(otherCount) ? 0 : long.Parse(otherCount),
                 string.IsNullOrEmpty(sysLogCount) ? 0 : long.Parse(sysLogCount),
-                parseTime(sysLogTime)
+                parseTime(sysLogTime),
+                TimeSpan.Zero
             ));
 
             totalPacks += long.Parse(packs);
@@ -455,8 +465,9 @@ void PrintPerFileTable(bool csvMode = false)
         var totalUpdateTime = new TimeSpan(perFileStats.Sum(s => s.UpdateTime.Ticks));
         var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
         var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
+        var totalDisabledSystemTime = new TimeSpan(perFileStats.Sum(s => s.DisabledSystemTime.Ticks));
 
-        Console.WriteLine($"TOTAL,{totalPacks},{totalDmains},{(totalFullTime)},{(totalMaxTime)},{totalAccCnt},{(totalAccTime)},{totalSelectCount},{(totalSelectTime - totalAccTime)},{totalInsertCount},{(totalInsertTime)},{totalUpdateCount},{(totalUpdateTime)},{totalSysLogCount},{(totalSysLogTime)}");
+        Console.WriteLine($"TOTAL,{totalPacks},{totalDmains},{(totalFullTime)},{(totalMaxTime)},{totalAccCnt},{(totalAccTime)},{totalSelectCount},{(totalSelectTime - totalAccTime)},{totalInsertCount},{(totalInsertTime)},{totalUpdateCount},{(totalUpdateTime)},{totalSysLogCount},{(totalSysLogTime)},{(totalDisabledSystemTime)}");
 
         long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
         if (showStats)
@@ -466,13 +477,13 @@ void PrintPerFileTable(bool csvMode = false)
     }
     else
     {
-        const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13}";
+        const string headerFmt = "{0,-38} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13} {15,13}";
 
-        Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time");
+        Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time", "Disabled time");
 
         if(showByFile)
         {
-            Console.WriteLine(new string('-', 185));
+            Console.WriteLine(new string('-', 183));
             foreach (var s in perFileStats.OrderByDescending(s => s.FullTime))
             {
                 Console.WriteLine(headerFmt,
@@ -490,10 +501,11 @@ void PrintPerFileTable(bool csvMode = false)
                     s.UpdateCount,
                     formatTimeWithPercent(s.UpdateTime, s.FullTime),
                     s.SysLogCount,
-                    formatTimeWithPercent(s.SysLogTime, s.FullTime)
+                    formatTimeWithPercent(s.SysLogTime, s.FullTime),
+                    formatTimeWithPercent(s.DisabledSystemTime, s.FullTime)
                     );
             }
-            Console.WriteLine(new string('-', 185));
+            Console.WriteLine(new string('-', 183));
         }
 
         // Summary row
@@ -512,6 +524,7 @@ void PrintPerFileTable(bool csvMode = false)
         var totalDbPercent = percent(totalFullTime, totalDBTime);
         var totalSysLogCount = perFileStats.Sum(s => s.SysLogCount);
         var totalSysLogTime = new TimeSpan(perFileStats.Sum(s => s.SysLogTime.Ticks));
+        var totalDisabledSystemTime = new TimeSpan(perFileStats.Sum(s => s.DisabledSystemTime.Ticks));
 
         Console.WriteLine(headerFmt,
             "TOTAL",
@@ -528,7 +541,8 @@ void PrintPerFileTable(bool csvMode = false)
             totalUpdateCount,
             formatTimeWithPercent(totalUpdateTime, totalFullTime),
             totalSysLogCount,
-            formatTimeWithPercent(totalSysLogTime, totalFullTime)
+            formatTimeWithPercent(totalSysLogTime, totalFullTime),
+            formatTimeWithPercent(totalDisabledSystemTime, totalFullTime)
             );
 
         long per1min = (long)(totalDmains / totalFullTime.TotalSeconds) * 60;
@@ -662,4 +676,4 @@ void SaveSettings(string path, Settings settings)
 
 record Settings(int Mode, bool ShowByFile, bool ShowStats, string Task, string DirPath, bool CsvFormat);
 
-record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, TimeSpan MaxTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime);
+record FileStats(string FileName, long Packs, long Dmains, TimeSpan FullTime, TimeSpan MaxTime, long AccCnt, TimeSpan AccTime, long SelectCount, TimeSpan SelectTime, long InsertCount, TimeSpan InsertTime, long UpdateCount, TimeSpan UpdateTime, long DeleteCount, long OtherCount, long SysLogCount, TimeSpan SysLogTime, TimeSpan DisabledSystemTime);

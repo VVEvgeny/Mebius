@@ -34,6 +34,7 @@ foreach (var l in fc.Split("\n"))
     if(string.IsNullOrWhiteSpace(l))
         continue;
     if(l.Contains(" (1001/22222 ") || l.Contains(" (1101/22222 ") || l.Contains(" (119/22222 ") || l.Contains(" (1410/22222 "))//packets + 101 + OD1
+    //if(l.Contains(" (1001/0 ") || l.Contains(" (1101/0 ") )//не из прошлых дней
     //if(l.Contains(" (695/0 ")||l.Contains(" (690/0 ")||l.Contains(" (691/0 "))
     {
         if(l.Contains(" XKernel: New message "))

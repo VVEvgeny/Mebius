@@ -1,6 +1,6 @@
-Mode=0
+Mode=1
 ShowByFile=True
-ShowStats=True
+ShowStats=False
 Task=812
-DirPath=c:\_Code\Mebius\MebiusTools\Profilers\asdasd\et100k\
+DirPath=c:\_Code\Mebius\MebiusTools\Profilers\20_09_2026_efimow\
 ShowDisabledTime=False

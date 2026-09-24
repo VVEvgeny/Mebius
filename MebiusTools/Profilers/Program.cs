@@ -481,7 +481,7 @@ void PrintPerFileTable(bool csvMode = false)
     }
     else
     {
-        string headerFmt = "{0,-27} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13} " + (showDisabledTime ? $"{15,13}" : "");
+        string headerFmt = "{0,-28} {1,8} {2,8} {3,10} {4,10} {5,7} {6,13} {7,9} {8,13} {9,9} {10,13} {11,8} {12,13} {13,8} {14,13} " + (showDisabledTime ? $"{15,13}" : "");
         Console.WriteLine(headerFmt, "File", "Packs", "Docs", "FullTime", "MaxTime", "Accs", "AccTime", "SELECT", "Select time", "INSERT", "Insert time", "UPDATE", "Update time", "SysLog", "SysLog time", showDisabledTime ? "Disabled time" : null);
 
         if(showByFile)
